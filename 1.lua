@@ -76,19 +76,22 @@ end)
 
 -- 主循环回调
 register_callback("paint", function()
-    -- 如果本地玩家不存在，则禁用反自瞄功能并退出
-    if not entitylist.get_local_player_pawn() then
-        menu.ragebot_anti_aim = false
-    end
-
-    -- 空格按住时开启AA，固定为180度
-    local is_space_pressed = is_key_pressed(KEYS["space"])
-    menu.ragebot_anti_aim = is_space_pressed
+    local local_player = entitylist.get_local_player_pawn()
     
-    -- 当空格按住时设置为180度
-    if is_space_pressed then
-        menu.ragebot_anti_aim_base_yaw_offset = DEFAULT_YAW
-        menu.ragebot_anti_aim_pitch = 2
+    -- 如果本地玩家不存在，则禁用反自瞄功能并重置kill计数器
+    if not local_player then
+        menu.ragebot_anti_aim = false
+        kill = 0  -- 重置击杀计数器，从头开始发送
+    else
+        -- 空格按住时开启AA，固定为180度
+        local is_space_pressed = is_key_pressed(KEYS["space"])
+        menu.ragebot_anti_aim = is_space_pressed
+        
+        -- 当空格按住时设置为180度
+        if is_space_pressed then
+            menu.ragebot_anti_aim_base_yaw_offset = DEFAULT_YAW
+            menu.ragebot_anti_aim_pitch = 2
+        end
     end
 end)
 
@@ -97,4 +100,5 @@ register_callback("unload", function()
     menu.ragebot_anti_aim_base_yaw_offset = DEFAULT_YAW
     menu.ragebot_anti_aim_pitch = 2
     menu.ragebot_anti_aim = false
+    kill = 0  -- 卸载时也重置计数器
 end)
