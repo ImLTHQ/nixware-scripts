@@ -31,7 +31,7 @@ local kill_say = {
     "与其和我斗气, 不如闭目养神, 或者静心品茗",
     "VAC 不会放过任何一个作弊者, 本账号注定会被封禁",
     "如果无法忍受官匹外挂太多, 各大对战平台则是您的不二之选",
-    "请不要骂人, 文明互联网, 骂人不解决问题",
+    "请不要骂人, 文明互联网, 骂人不能解决问题",
     "开挂可耻, 开挂有罪, 希望您能原谅没有忍受外挂诱惑的我！",
     "您是否在电脑前坐太久了呢, 站立一分钟并深呼吸, 放松一下身心。",
     "如果您没心情继续游戏, 可以挂机, 并浏览一会网页",
@@ -83,7 +83,7 @@ register_callback("paint", function()
         menu.ragebot_anti_aim = false
         kill = 0  -- 重置击杀计数器，从头开始发送
     else
-        -- 空格按住时开启AA，固定为180度
+        -- 空格按住时开启AA，固定为180度w
         local is_space_pressed = is_key_pressed(KEYS["space"])
         menu.ragebot_anti_aim = is_space_pressed
         
