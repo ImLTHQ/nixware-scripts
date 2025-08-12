@@ -5,7 +5,7 @@ local say_enabled = false
 -- 用于防止重复触发的状态记录
 local v_key_last_state = false
 -- 初始化字体
-local font = render.setup_font("C:\\Windows\\Fonts\\msyhl.ttc", 18, 400)
+local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 20, 500)
 
 -- 声明按键检测函数
 ffi.cdef [[
