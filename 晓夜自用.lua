@@ -38,7 +38,7 @@ menu.ragebot_anti_aim_base_yaw_offset = DEFAULT_YAW
 
 -- 击杀播报内容
 local kill_say = {
-    "memesense.gg | 您已被尊贵的 memesense 用户击杀",
+    "nixware.cc | 您已被尊贵的 nixware 用户击杀",
     "我曾经带领车队一天死了 100 个号",
     "组队群1046853514 | 加入我们",
     "我开挂了, 我承认错误",
