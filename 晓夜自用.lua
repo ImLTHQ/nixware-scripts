@@ -5,6 +5,10 @@ local welcome_messages = {
     "I come from Japan",
     "My name is Sakurajima Hatsuyuki",
     "机长申请起飞",
+    "笔扬得万意",
+    "驰诗构东西",
+    "墨落惊风雨",
+    "文成泣鬼神",
 }
 
 local delay_time = 20
