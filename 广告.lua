@@ -10,8 +10,8 @@ local page_down_enabled = false
 local page_up_last_state = false
 local page_down_last_state = false
 
--- 初始化字体（使用支持更多符号的黑体）
-local font = render.setup_font("C:\\Windows\\Fonts\\simhei.ttf", 20, 500)
+-- 初始化字体
+local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 20, 500)
 
 -- 声明按键检测函数
 ffi.cdef [[
