@@ -2,9 +2,11 @@
 local welcome_messages = {
     "你好我的中国朋友",
     "我来自日本",
-    "I come from JP",
+    "I come from Japan",
     "My name is Sakurajima Hatsuyuki"
 }
+
+local delay_time = 20
 
 -- 消息发送控制变量
 local message_sent = false  -- 是否已发送过欢迎消息
@@ -68,9 +70,9 @@ register_callback("paint", function()
     else
         -- 处理欢迎消息发送
         if not message_sent then
-            -- 首次检测到玩家，设置15秒后发送第一条消息
+            -- 首次检测到玩家，设置延迟发送第一条消息
             if message_index == 1 then
-                next_send_time = current_time + 15
+                next_send_time = current_time + delay_time
                 message_index = message_index + 1
             -- 检查是否到了发送时间
             elseif current_time >= next_send_time then
