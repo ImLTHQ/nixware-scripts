@@ -61,11 +61,11 @@ register_callback("paint", function()
 
     -- 当C键开关开启时发送群广告
     if c_enabled then
-        engine.execute_client_cmd("say 组队群1046853514 | 加入我们")
+        engine.execute_client_cmd("say 开挂组队群: 1046853514 | 加入我们")
     end
 
     -- 当V键开关开启时发送网址
     if v_enabled then
-        engine.execute_client_cmd("say 网址: 长相思.我爱你 | 购买外挂")
+        engine.execute_client_cmd("say 网址: cxs.hvh.asia | 续费外挂")
     end
 end)
