@@ -54,14 +54,14 @@ register_callback("paint", function()
     local c_color = c_enabled and color_t(0, 1, 0, 1) or color_t(1, 0, 0, 1)
     -- 绘制带阴影的状态指示文字
     render.text("[C] 群广告", font, c_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
-    render.text("[C] 卡网广告", font, c_text_position, c_color, 18)
+    render.text("[C] 群广告", font, c_text_position, c_color, 18)
 
     -- 渲染V键状态（仅颜色变化）
     local v_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 110)
     local v_color = v_enabled and color_t(0, 1, 0, 1) or color_t(1, 0, 0, 1)
     -- 绘制带阴影的状态指示文字
-    render.text("[V]", font, v_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
-    render.text("[V]", font, v_text_position, v_color, 18)
+    render.text("[V] 卡网广告", font, v_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
+    render.text("[V] 卡网广告", font, v_text_position, v_color, 18)
 
     -- 当C键开关开启时发送群广告
     if c_enabled then
