@@ -29,6 +29,11 @@ register_callback("paint", function()
     local is_c_pressed = is_key_pressed(KEY_C)
     if is_c_pressed and not c_key_last_state then
         c_enabled = not c_enabled
+        
+        -- 当C开启时，自动关闭V
+        if c_enabled then
+            v_enabled = false
+        end
     end
     c_key_last_state = is_c_pressed
 
@@ -36,6 +41,11 @@ register_callback("paint", function()
     local is_v_pressed = is_key_pressed(KEY_V)
     if is_v_pressed and not v_key_last_state then
         v_enabled = not v_enabled
+        
+        -- 当V开启时，自动关闭C
+        if v_enabled then
+            c_enabled = false
+        end
     end
     v_key_last_state = is_v_pressed
 
