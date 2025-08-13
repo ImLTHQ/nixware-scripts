@@ -117,7 +117,7 @@ register_callback("paint", function()
                 -- 发送当前消息（使用message_index - 1作为索引）
                 engine.execute_client_cmd("say " .. welcome_messages[message_index - 1])
                 
-                -- 检查是否还有下一条消息（修复判断条件）
+                -- 检查是否还有下一条消息
                 if (message_index - 1) < #welcome_messages then
                     -- 设置下一条消息的发送时间（3秒后）
                     next_send_time = current_time + 3
