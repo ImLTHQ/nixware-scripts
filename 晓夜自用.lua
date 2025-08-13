@@ -3,7 +3,7 @@ local welcome_messages = {
     "你好我的中国朋友",
     "我来自日本",
     "I come from Japan",
-    "My name is Sakurajima Hatsuyuki"
+    "My name is Sakurajima Hatsuyuki",
 }
 
 local delay_time = 20
