@@ -268,7 +268,7 @@ register_callback("paint", function()
     else
         -- 处理欢迎消息发送
         if not message_sent then
-            -- 首次检测到玩家，设置延迟发送第一条消息
+            -- 检测到玩家，设置延迟发送第一条消息
             if message_index == 1 then
                 next_send_time = current_time + delay_time
                 message_index = message_index + 1
