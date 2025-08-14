@@ -265,6 +265,8 @@ register_callback("paint", function()
         rotate_left = false
         rotate_right = false
         kill_message_enabled = false
+        page_up_enabled = false
+        page_down_enabled = false
     else
         -- 处理欢迎消息发送
         if not message_sent then
