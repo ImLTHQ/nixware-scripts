@@ -18,8 +18,13 @@ local KEYS = {
     space = 0x20  -- 空格键
 }
 
--- 定义默认偏移角度
+-- 定义默认偏移角度和旋转速度
 local DEFAULT_YAW = 180
+local rotation_speed = 0  -- 旋转速度，单位：度/秒
+
+-- 旋转角度控制变量
+local current_yaw = DEFAULT_YAW
+local last_update_time = os.clock()
 
 -- 定义 GetAsyncKeyState 函数，用于检测按键状态
 ffi.cdef [[
@@ -89,6 +94,25 @@ register_callback("player_death", function(event)
     end
 end)
 
+-- 更新旋转角度的函数
+local function update_rotation()
+    local current_time = os.clock()
+    local delta_time = current_time - last_update_time
+    last_update_time = current_time
+    
+    -- 根据速度和时间差计算角度变化
+    current_yaw = current_yaw + rotation_speed * delta_time
+    
+    -- 确保角度在-180到180之间循环
+    if current_yaw > 180 then
+        current_yaw = -180  -- 超过180度时回到-180度
+    elseif current_yaw < -180 then
+        current_yaw = 180   -- 低于-180度时回到180度
+    end
+    
+    return current_yaw
+end
+
 -- 主循环回调
 register_callback("paint", function()
     local local_player = entitylist.get_local_player_pawn()
@@ -124,13 +148,18 @@ register_callback("paint", function()
             end
         end
         
-        -- 空格按住时开启AA，固定为180度
+        -- 空格按住时开启AA
         local is_space_pressed = is_key_pressed(KEYS["space"])
         menu.ragebot_anti_aim = is_space_pressed
         
         if is_space_pressed then
-            menu.ragebot_anti_aim_base_yaw_offset = DEFAULT_YAW
+            -- 更新并应用旋转角度
+            menu.ragebot_anti_aim_base_yaw_offset = update_rotation()
             menu.ragebot_anti_aim_pitch = 2
+        else
+            -- 未按空格时重置为默认角度
+            current_yaw = DEFAULT_YAW
+            menu.ragebot_anti_aim_base_yaw_offset = DEFAULT_YAW
         end
     end
 end)
