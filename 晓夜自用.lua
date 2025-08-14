@@ -215,17 +215,17 @@ register_callback("paint", function()
     end
     page_down_last_state = is_page_down_pressed
 
-    -- 渲染旋转控制提示文字及状态，开启时绿色，关闭时红色
+    -- 渲染旋转控制提示文字及状态，开启时绿色，关闭时白色
     local is_rotating = rotate_left or rotate_right
-    local rotation_color = is_rotating and color_t(0, 1, 0, 1) or color_t(1, 0, 0, 1)
+    local rotation_color = is_rotating and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     local rotation_text = "[Z/C] 旋转 " .. ROTATION_SPEED .. "度/秒"
     local rotation_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 50)
     -- 绘制带阴影的提示文字
     render.text(rotation_text, font, rotation_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text(rotation_text, font, rotation_text_position, rotation_color, 18)
 
-    -- 渲染击杀播报提示文字及状态，开启时绿色，关闭时红色
-    local kill_message_color = kill_message_enabled and color_t(0, 1, 0, 1) or color_t(1, 0, 0, 1)
+    -- 渲染击杀播报提示文字及状态，开启时绿色，关闭时白色
+    local kill_message_color = kill_message_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     local kill_message_text = "[V] 击杀播报"
     local kill_message_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 80)
     -- 绘制带阴影的提示文字
@@ -234,14 +234,14 @@ register_callback("paint", function()
 
     -- 渲染Page Up键状态（群广告）
     local page_up_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 110)
-    local page_up_color = page_up_enabled and color_t(0, 1, 0, 1) or color_t(1, 0, 0, 1)
+    local page_up_color = page_up_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     -- 绘制带阴影的状态指示文字
     render.text("[PgUp] 群广告", font, page_up_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text("[PgUp] 群广告", font, page_up_text_position, page_up_color, 18)
 
     -- 渲染Page Down键状态（卡网广告）
     local page_down_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
-    local page_down_color = page_down_enabled and color_t(0, 1, 0, 1) or color_t(1, 0, 0, 1)
+    local page_down_color = page_down_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     -- 绘制带阴影的状态指示文字
     render.text("[PgDn] 卡网广告", font, page_down_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text("[PgDn] 卡网广告", font, page_down_text_position, page_down_color, 18)
