@@ -52,7 +52,7 @@ local z_last_state = false  -- Z键状态记录
 local c_last_state = false  -- C键状态记录
 
 -- 初始化字体
-local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 20, 500)
+local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 30, 500)
 
 -- 定义 GetAsyncKeyState 函数，用于检测按键状态
 ffi.cdef [[
@@ -227,20 +227,20 @@ register_callback("paint", function()
     -- 渲染击杀播报提示文字及状态，开启时绿色，关闭时白色
     local kill_message_color = kill_message_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     local kill_message_text = "[V] 击杀播报"
-    local kill_message_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 80)
+    local kill_message_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 70)
     -- 绘制带阴影的提示文字
     render.text(kill_message_text, font, kill_message_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text(kill_message_text, font, kill_message_position, kill_message_color, 18)
 
     -- 渲染Page Up键状态（群广告）
-    local page_up_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 110)
+    local page_up_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 90)
     local page_up_color = page_up_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     -- 绘制带阴影的状态指示文字
     render.text("[PgUp] 群广告", font, page_up_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text("[PgUp] 群广告", font, page_up_text_position, page_up_color, 18)
 
     -- 渲染Page Down键状态（卡网广告）
-    local page_down_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
+    local page_down_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 110)
     local page_down_color = page_down_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     -- 绘制带阴影的状态指示文字
     render.text("[PgDn] 卡网广告", font, page_down_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
