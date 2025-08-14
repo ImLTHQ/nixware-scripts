@@ -19,7 +19,7 @@ local KEYS = {
 }
 
 -- 定义默认偏移角度
-local DEFAULT_YAW = 180
+local DEFAULT_YAW = 0
 
 -- 定义 GetAsyncKeyState 函数，用于检测按键状态
 ffi.cdef [[
