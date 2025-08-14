@@ -169,9 +169,9 @@ register_callback("paint", function()
     
     -- 根据开关状态设置旋转速度（使用全局变量ROTATION_SPEED）
     if rotate_left then
-        rotation_speed = -ROTATION_SPEED  -- 左旋（负值）
+        rotation_speed = ROTATION_SPEED  -- 左旋
     elseif rotate_right then
-        rotation_speed = ROTATION_SPEED   -- 右旋（正值）
+        rotation_speed = -ROTATION_SPEED   -- 右旋
     else
         rotation_speed = 0                -- 停止旋转
         current_yaw = DEFAULT_YAW         -- 恢复默认偏移
