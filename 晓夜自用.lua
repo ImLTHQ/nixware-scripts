@@ -1,3 +1,6 @@
+-- 定义旋转速度
+local ROTATION_SPEED = 720  -- 旋转速度，单位：度/秒
+
 -- 定义需要发送的消息
 local welcome_messages = {
     "你好我的中国朋友",
@@ -22,9 +25,8 @@ local KEYS = {
     c = 0x43       -- C键
 }
 
--- 定义默认偏移角度和旋转速度
 local DEFAULT_YAW = 180
-local rotation_speed = 0  -- 旋转速度，单位：度/秒
+local rotation_speed = 0
 
 -- 旋转状态控制变量
 local rotate_left = false  -- Z键控制的左旋状态
@@ -162,14 +164,14 @@ register_callback("paint", function()
     end
     c_last_state = is_c_pressed
     
-    -- 根据开关状态设置旋转速度
+    -- 根据开关状态设置旋转速度（使用全局变量ROTATION_SPEED）
     if rotate_left then
-        rotation_speed = -720  -- 左旋
+        rotation_speed = -ROTATION_SPEED  -- 左旋（负值）
     elseif rotate_right then
-        rotation_speed = 720   -- 右旋
+        rotation_speed = ROTATION_SPEED   -- 右旋（正值）
     else
-        rotation_speed = 0     -- 停止旋转
-        current_yaw = DEFAULT_YAW  -- 恢复默认偏移
+        rotation_speed = 0                -- 停止旋转
+        current_yaw = DEFAULT_YAW         -- 恢复默认偏移
     end
     
     -- 检测Page Up键状态切换
@@ -199,7 +201,7 @@ register_callback("paint", function()
     -- 渲染旋转控制提示文字及状态，开启时绿色，关闭时红色
     local is_rotating = rotate_left or rotate_right
     local rotation_color = is_rotating and color_t(0, 1, 0, 1) or color_t(1, 0, 0, 1)
-    local rotation_text = "[Z/C] 旋转"
+    local rotation_text = "[Z/C] 旋转 - " .. ROTATION_SPEED .. "度/秒"
     local rotation_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 50)
     -- 绘制带阴影的提示文字
     render.text(rotation_text, font, rotation_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
