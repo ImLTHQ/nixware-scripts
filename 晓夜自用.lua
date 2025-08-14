@@ -138,6 +138,9 @@ end
 
 -- 主循环回调
 register_callback("paint", function()
+    engine.execute_client_cmd("unbind z")
+    engine.execute_client_cmd("unbind c")
+
     local local_player = entitylist.get_local_player_pawn()
     local current_time = os.clock()  -- 使用os.clock()获取时间
     local screen_size = render.screen_size()
