@@ -17,12 +17,18 @@ local next_send_time = 0    -- 下一条消息的发送时间
 local KEYS = {
     space = 0x20,  -- 空格键
     page_up = 0x21, -- Page Up键
-    page_down = 0x22 -- Page Down键
+    page_down = 0x22, -- Page Down键
+    z = 0x5A,      -- Z键
+    c = 0x43       -- C键
 }
 
 -- 定义默认偏移角度和旋转速度
 local DEFAULT_YAW = 180
 local rotation_speed = 0  -- 旋转速度，单位：度/秒
+
+-- 旋转状态控制变量
+local rotate_left = false  -- Z键控制的左旋状态
+local rotate_right = false -- C键控制的右旋状态
 
 -- 旋转角度控制变量
 local current_yaw = DEFAULT_YAW
@@ -35,6 +41,8 @@ local page_down_enabled = false
 -- 用于防止重复触发的状态记录
 local page_up_last_state = false
 local page_down_last_state = false
+local z_last_state = false  -- Z键状态记录
+local c_last_state = false  -- C键状态记录
 
 -- 初始化字体
 local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 20, 500)
@@ -132,6 +140,38 @@ register_callback("paint", function()
     local current_time = os.clock()  -- 使用os.clock()获取时间
     local screen_size = render.screen_size()
     
+    -- 检测Z键状态切换（互斥开关）
+    local is_z_pressed = is_key_pressed(KEYS.z)
+    if is_z_pressed and not z_last_state then
+        rotate_left = not rotate_left
+        -- 如果开启左旋，则关闭右旋
+        if rotate_left then
+            rotate_right = false
+        end
+    end
+    z_last_state = is_z_pressed
+    
+    -- 检测C键状态切换（互斥开关）
+    local is_c_pressed = is_key_pressed(KEYS.c)
+    if is_c_pressed and not c_last_state then
+        rotate_right = not rotate_right
+        -- 如果开启右旋，则关闭左旋
+        if rotate_right then
+            rotate_left = false
+        end
+    end
+    c_last_state = is_c_pressed
+    
+    -- 根据开关状态设置旋转速度
+    if rotate_left then
+        rotation_speed = -720  -- 左旋
+    elseif rotate_right then
+        rotation_speed = 720   -- 右旋
+    else
+        rotation_speed = 0     -- 停止旋转
+        current_yaw = DEFAULT_YAW  -- 恢复默认偏移
+    end
+    
     -- 检测Page Up键状态切换
     local is_page_up_pressed = is_key_pressed(KEYS.page_up)
     if is_page_up_pressed and not page_up_last_state then
@@ -155,6 +195,15 @@ register_callback("paint", function()
         end
     end
     page_down_last_state = is_page_down_pressed
+
+    -- 渲染旋转控制提示文字及状态，开启时绿色，关闭时红色
+    local is_rotating = rotate_left or rotate_right
+    local rotation_color = is_rotating and color_t(0, 1, 0, 1) or color_t(1, 0, 0, 1)
+    local rotation_text = "[Z/C] 旋转"
+    local rotation_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 50)
+    -- 绘制带阴影的提示文字
+    render.text(rotation_text, font, rotation_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
+    render.text(rotation_text, font, rotation_text_position, rotation_color, 18)
 
     -- 渲染Page Up键状态
     local page_up_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 80)
@@ -186,6 +235,8 @@ register_callback("paint", function()
         kill = 0
         message_sent = false
         message_index = 1
+        rotate_left = false
+        rotate_right = false
     else
         -- 处理欢迎消息发送
         if not message_sent then
