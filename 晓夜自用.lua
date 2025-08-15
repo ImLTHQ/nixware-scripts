@@ -178,6 +178,12 @@ register_callback("paint", function()
     local is_v_pressed = is_key_pressed(KEYS.v)
     if is_v_pressed and not v_last_state then
         kill_message_enabled = not kill_message_enabled
+        
+        -- 击杀播报开启时，自动关闭群广告和卡网广告
+        if kill_message_enabled then
+            page_up_enabled = false    -- 关闭群广告
+            page_down_enabled = false  -- 关闭卡网广告
+        end
     end
     v_last_state = is_v_pressed
 
@@ -191,26 +197,28 @@ register_callback("paint", function()
         current_yaw = DEFAULT_YAW         -- 恢复默认偏移
     end
     
-    -- 检测Page Up键状态切换
+    -- 检测Page Up键状态切换（群广告）
     local is_page_up_pressed = is_key_pressed(KEYS.page_up)
     if is_page_up_pressed and not page_up_last_state then
         page_up_enabled = not page_up_enabled
         
-        -- 当Page Up功能开启时，自动关闭Page Down功能（防止冲突）
+        -- 群广告开启时，自动关闭击杀播报和卡网广告
         if page_up_enabled then
-            page_down_enabled = false
+            kill_message_enabled = false  -- 关闭击杀播报
+            page_down_enabled = false     -- 关闭卡网广告
         end
     end
     page_up_last_state = is_page_up_pressed
 
-    -- 检测Page Down键状态切换
+    -- 检测Page Down键状态切换（卡网广告）
     local is_page_down_pressed = is_key_pressed(KEYS.page_down)
     if is_page_down_pressed and not page_down_last_state then
         page_down_enabled = not page_down_enabled
         
-        -- 当Page Down功能开启时，自动关闭Page Up功能（防止冲突）
+        -- 卡网广告开启时，自动关闭击杀播报和群广告
         if page_down_enabled then
-            page_up_enabled = false
+            kill_message_enabled = false  -- 关闭击杀播报
+            page_up_enabled = false       -- 关闭群广告
         end
     end
     page_down_last_state = is_page_down_pressed
