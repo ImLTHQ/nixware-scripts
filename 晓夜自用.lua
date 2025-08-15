@@ -14,15 +14,15 @@ local message_index = 1     -- 当前要发送的消息索引
 local next_send_time = 0    -- 下一条消息的发送时间
 local sending_messages = false  -- 是否正在发送消息序列
 
--- 定义按键的虚拟键码
+-- 定义按键的虚拟键码（使用字符串键名避免关键字冲突）
 local KEYS = {
     space = 0x20,
     page_up = 0x21,
     page_down = 0x22,
+    home = 0x24,              -- Home键的虚拟键码
+    ["end"] = 0x23,           -- 用字符串形式定义end键，避免关键字冲突
     z = 0x5A,
-    c = 0x43,
-    v = 0x56,  -- V键的虚拟键码
-    t = 0x54   -- T键的虚拟键码
+    c = 0x43
 }
 
 local DEFAULT_YAW = 180
@@ -34,7 +34,7 @@ local rotate_right = false -- C键控制的右旋状态
 
 -- 击杀播报开关状态（默认关闭）
 local kill_message_enabled = false
-local v_last_state = false  -- 用于V键状态检测
+local home_last_state = false  -- 用于Home键状态检测
 
 -- 旋转角度控制变量
 local current_yaw = DEFAULT_YAW
@@ -49,7 +49,7 @@ local page_up_last_state = false
 local page_down_last_state = false
 local z_last_state = false
 local c_last_state = false
-local t_last_state = false  -- 用于T键状态检测
+local end_last_state = false  -- 用于End键状态检测
 
 -- 初始化字体
 local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 30, 500)
@@ -113,10 +113,13 @@ local kill_say = {
 
 local kill = 0
 
+-- 解绑相关按键
 engine.execute_client_cmd("unbind z")
 engine.execute_client_cmd("unbind c")
-engine.execute_client_cmd("unbind v")  -- 解除V键默认绑定
-engine.execute_client_cmd("unbind t")  -- 解除T键默认绑定
+engine.execute_client_cmd("unbind home")  -- 解除Home键默认绑定
+engine.execute_client_cmd("unbind end")   -- 解除End键默认绑定
+engine.execute_client_cmd("unbind pgup")  -- 解除PageUp键默认绑定
+engine.execute_client_cmd("unbind pgdn")  -- 解除PageDown键默认绑定
 
 -- 击杀播报回调，添加开关控制
 register_callback("player_death", function(event)
@@ -202,9 +205,9 @@ register_callback("paint", function()
     end
     c_last_state = is_c_pressed
 
-    -- 检测V键状态切换（击杀播报开关）
-    local is_v_pressed = is_key_pressed(KEYS.v)
-    if is_v_pressed and not v_last_state then
+    -- 检测Home键状态切换（击杀播报开关）
+    local is_home_pressed = is_key_pressed(KEYS.home)
+    if is_home_pressed and not home_last_state then
         kill_message_enabled = not kill_message_enabled
         -- 开启击杀播报时关闭其他广告
         if kill_message_enabled then
@@ -212,14 +215,14 @@ register_callback("paint", function()
             page_down_enabled = false
         end
     end
-    v_last_state = is_v_pressed
+    home_last_state = is_home_pressed
 
-    -- 检测T键状态（开始发送欢迎消息序列）
-    local is_t_pressed = is_key_pressed(KEYS.t)
-    if is_t_pressed and not t_last_state then
+    -- 检测End键状态（开始发送欢迎消息序列）
+    local is_end_pressed = is_key_pressed(KEYS["end"])  -- 使用字符串索引访问end键
+    if is_end_pressed and not end_last_state then
         start_sending_welcome_messages()
     end
-    t_last_state = is_t_pressed
+    end_last_state = is_end_pressed
 
     -- 处理消息发送
     process_message_sending(current_time)
@@ -266,17 +269,17 @@ register_callback("paint", function()
     render.text(rotation_text, font, rotation_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text(rotation_text, font, rotation_text_position, rotation_color, 18)
 
-    -- 渲染V键击杀播报状态
+    -- 渲染Home键击杀播报状态
     local kill_message_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 120)
     local kill_message_color = kill_message_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
-    render.text("[V] 击杀播报", font, kill_message_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
-    render.text("[V] 击杀播报", font, kill_message_text_position, kill_message_color, 18)
+    render.text("[Home] 击杀播报", font, kill_message_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
+    render.text("[Home] 击杀播报", font, kill_message_text_position, kill_message_color, 18)
 
-    -- 渲染T键自我介绍
-    local t_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
-    local t_color = sending_messages and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
-    render.text("[T] 自我介绍", font, t_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
-    render.text("[T] 自我介绍", font, t_text_position, t_color, 18)
+    -- 渲染End键自我介绍
+    local end_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
+    local end_color = sending_messages and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
+    render.text("[End] 自我介绍", font, end_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
+    render.text("[End] 自我介绍", font, end_text_position, end_color, 18)
 
     -- 渲染Page Up键状态（群广告）
     local page_up_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 160)
