@@ -1,7 +1,7 @@
 -- 定义旋转速度
 local ROTATION_SPEED = 720  -- 旋转速度，单位：度/秒
 
--- 定义需要发送的消息
+-- 定义需要发送的消息（自我介绍）
 local welcome_messages = {
     "你好我的中国朋友",
     "我来自日本",
@@ -12,7 +12,7 @@ local welcome_messages = {
 -- 消息发送控制变量
 local message_index = 1     -- 当前要发送的消息索引
 local next_send_time = 0    -- 下一条消息的发送时间
-local sending_messages = false  -- 是否正在发送消息序列
+local sending_messages = false  -- 是否正在发送消息序列（自我介绍）
 
 -- 定义按键的虚拟键码（使用字符串键名避免关键字冲突）
 local KEYS = {
@@ -41,8 +41,8 @@ local current_yaw = DEFAULT_YAW
 local last_update_time = os.clock()
 
 -- 广告开关状态，默认关闭
-local page_up_enabled = false
-local page_down_enabled = false
+local page_up_enabled = false  -- 群广告
+local page_down_enabled = false -- 卡网广告
 
 -- 用于防止重复触发的状态记录
 local page_up_last_state = false
@@ -149,9 +149,13 @@ local function update_rotation()
     return current_yaw
 end
 
--- 开始发送欢迎消息序列
+-- 开始发送欢迎消息序列（自我介绍）
 local function start_sending_welcome_messages()
     if not sending_messages then
+        -- 启动自我介绍时，关闭广告
+        page_up_enabled = false    -- 关闭群广告
+        page_down_enabled = false  -- 关闭卡网广告
+        
         sending_messages = true
         message_index = 1
         next_send_time = os.clock()  -- 立即发送第一条消息
@@ -213,6 +217,7 @@ register_callback("paint", function()
         if kill_message_enabled then
             page_up_enabled = false
             page_down_enabled = false
+            sending_messages = false  -- 关闭自我介绍
         end
     end
     home_last_state = is_home_pressed
@@ -241,10 +246,11 @@ register_callback("paint", function()
     local is_page_up_pressed = is_key_pressed(KEYS.page_up)
     if is_page_up_pressed and not page_up_last_state then
         page_up_enabled = not page_up_enabled
-        -- 开启群广告时关闭其他广告
+        -- 开启群广告时关闭其他广告和自我介绍
         if page_up_enabled then
             page_down_enabled = false
             kill_message_enabled = false
+            sending_messages = false  -- 关闭自我介绍
         end
     end
     page_up_last_state = is_page_up_pressed
@@ -253,10 +259,11 @@ register_callback("paint", function()
     local is_page_down_pressed = is_key_pressed(KEYS.page_down)
     if is_page_down_pressed and not page_down_last_state then
         page_down_enabled = not page_down_enabled
-        -- 开启卡网广告时关闭其他广告
+        -- 开启卡网广告时关闭其他广告和自我介绍
         if page_down_enabled then
             page_up_enabled = false
             kill_message_enabled = false
+            sending_messages = false  -- 关闭自我介绍
         end
     end
     page_down_last_state = is_page_down_pressed
