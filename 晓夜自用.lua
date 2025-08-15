@@ -73,7 +73,6 @@ menu.ragebot_anti_aim_base_yaw_offset = DEFAULT_YAW
 local kill_say = {
     "nixware.cc | 您已被尊贵的 nixware 用户击杀",
     "我曾经带领车队一天死了 100 个号",
-    "QQ群: 1046853514 | 加入我们",
     "我开挂了, 我承认错误",
     "请别和我一样使用外挂",
     "与其和我斗气, 不如闭目养神, 或者静心品茗",
