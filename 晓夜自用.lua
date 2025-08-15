@@ -243,7 +243,7 @@ register_callback("paint", function()
     render.text(kill_message_text, font, kill_message_position, kill_message_color, 18)
 
     -- 渲染Q键自动购买提示文字
-    local auto_buy_text = "[Q] 自动购买"
+    local auto_buy_text = "[Q] 快捷购买"
     local auto_buy_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
     -- 绘制带阴影的提示文字
     render.text(auto_buy_text, font, auto_buy_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
