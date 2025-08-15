@@ -51,10 +51,6 @@ local page_down_last_state = false
 local z_last_state = false
 local c_last_state = false
 
--- 击杀事件跟踪变量
-local player_death_occurred = false
-local death_event_data = nil
-
 -- 初始化字体
 local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 30, 500)
 
@@ -122,10 +118,13 @@ engine.execute_client_cmd("unbind z")
 engine.execute_client_cmd("unbind c")
 engine.execute_client_cmd("unbind v")
 
--- 注册死亡事件监听器，仅记录事件不处理
+-- 击杀播报回调
 register_callback("player_death", function(event)
-    player_death_occurred = true
-    death_event_data = event
+    -- 只有当击杀播报开启时，才发送消息
+    if kill_message_enabled and event:get_pawn("attacker") == entitylist.get_local_player_pawn() then
+        engine.execute_client_cmd("say " .. kill_say[kill % #kill_say + 1])
+        kill = kill + 1
+    end
 end)
 
 -- 更新旋转角度的函数
@@ -149,18 +148,6 @@ end
 
 -- 主循环回调
 register_callback("paint", function()
-    -- 处理玩家死亡事件（嵌入到paint回调中）
-    if player_death_occurred and death_event_data then
-        -- 只有当击杀播报开启时，才发送消息
-        if kill_message_enabled and death_event_data:get_pawn("attacker") == entitylist.get_local_player_pawn() then
-            engine.execute_client_cmd("say " .. kill_say[kill % #kill_say + 1])
-            kill = kill + 1
-        end
-        -- 重置死亡事件标记
-        player_death_occurred = false
-        death_event_data = nil
-    end
-
     local local_player = entitylist.get_local_player_pawn()
     local current_time = os.clock()  -- 使用os.clock()获取时间
     local screen_size = render.screen_size()
