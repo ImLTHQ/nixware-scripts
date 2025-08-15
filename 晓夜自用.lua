@@ -23,7 +23,6 @@ local KEYS = {
     page_down = 0x22,
     z = 0x5A,
     c = 0x43,
-    v = 0x56,
 }
 
 local DEFAULT_YAW = 180
@@ -33,9 +32,8 @@ local rotation_speed = 0
 local rotate_left = false  -- Z键控制的左旋状态
 local rotate_right = false -- C键控制的右旋状态
 
--- 击杀播报开关状态
-local kill_message_enabled = false  -- 默认关闭击杀播报
-local v_last_state = false          -- V键状态记录
+-- 击杀播报开关状态（默认始终开启）
+local kill_message_enabled = true
 
 -- 旋转角度控制变量
 local current_yaw = DEFAULT_YAW
@@ -116,12 +114,10 @@ local kill = 0
 
 engine.execute_client_cmd("unbind z")
 engine.execute_client_cmd("unbind c")
-engine.execute_client_cmd("unbind v")
 
 -- 击杀播报回调
 register_callback("player_death", function(event)
-    -- 只有当击杀播报开启时，才发送消息
-    if kill_message_enabled and event:get_pawn("attacker") == entitylist.get_local_player_pawn() then
+    if event:get_pawn("attacker") == entitylist.get_local_player_pawn() then
         engine.execute_client_cmd("say " .. kill_say[kill % #kill_say + 1])
         kill = kill + 1
     end
@@ -173,19 +169,6 @@ register_callback("paint", function()
         end
     end
     c_last_state = is_c_pressed
-    
-    -- 检测V键状态切换（击杀播报开关）
-    local is_v_pressed = is_key_pressed(KEYS.v)
-    if is_v_pressed and not v_last_state then
-        kill_message_enabled = not kill_message_enabled
-        
-        -- 击杀播报开启时，自动关闭群广告和卡网广告
-        if kill_message_enabled then
-            page_up_enabled = false    -- 关闭群广告
-            page_down_enabled = false  -- 关闭卡网广告
-        end
-    end
-    v_last_state = is_v_pressed
 
     -- 根据开关状态设置旋转速度（使用全局变量ROTATION_SPEED）
     if rotate_left then
@@ -201,11 +184,9 @@ register_callback("paint", function()
     local is_page_up_pressed = is_key_pressed(KEYS.page_up)
     if is_page_up_pressed and not page_up_last_state then
         page_up_enabled = not page_up_enabled
-        
-        -- 群广告开启时，自动关闭击杀播报和卡网广告
+        -- 开启群广告时不再关闭击杀播报
         if page_up_enabled then
-            kill_message_enabled = false  -- 关闭击杀播报
-            page_down_enabled = false     -- 关闭卡网广告
+            page_down_enabled = false
         end
     end
     page_up_last_state = is_page_up_pressed
@@ -214,11 +195,8 @@ register_callback("paint", function()
     local is_page_down_pressed = is_key_pressed(KEYS.page_down)
     if is_page_down_pressed and not page_down_last_state then
         page_down_enabled = not page_down_enabled
-        
-        -- 卡网广告开启时，自动关闭击杀播报和群广告
         if page_down_enabled then
-            kill_message_enabled = false  -- 关闭击杀播报
-            page_up_enabled = false       -- 关闭群广告
+            page_up_enabled = false
         end
     end
     page_down_last_state = is_page_down_pressed
@@ -232,23 +210,15 @@ register_callback("paint", function()
     render.text(rotation_text, font, rotation_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text(rotation_text, font, rotation_text_position, rotation_color, 18)
 
-    -- 渲染击杀播报提示文字及状态，开启时绿色，关闭时白色
-    local kill_message_color = kill_message_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
-    local kill_message_text = "[V] 击杀播报"
-    local kill_message_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 120)
-    -- 绘制带阴影的提示文字
-    render.text(kill_message_text, font, kill_message_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
-    render.text(kill_message_text, font, kill_message_position, kill_message_color, 18)
-
     -- 渲染Page Up键状态（群广告）
-    local page_up_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
+    local page_up_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 120)
     local page_up_color = page_up_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     -- 绘制带阴影的状态指示文字
     render.text("[PgUp] 群广告", font, page_up_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text("[PgUp] 群广告", font, page_up_text_position, page_up_color, 18)
 
     -- 渲染Page Down键状态（卡网广告）
-    local page_down_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 160)
+    local page_down_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
     local page_down_color = page_down_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     -- 绘制带阴影的状态指示文字
     render.text("[PgDn] 卡网广告", font, page_down_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
@@ -272,7 +242,6 @@ register_callback("paint", function()
         message_index = 1
         rotate_left = false
         rotate_right = false
-        kill_message_enabled = false
         page_up_enabled = false
         page_down_enabled = false
     else
