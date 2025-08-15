@@ -188,7 +188,7 @@ register_callback("paint", function()
     local is_b_pressed = is_key_pressed(KEYS.b)
     if is_b_pressed and not b_last_state then
         -- 按下B键时执行购买命令
-        engine.execute_client_cmd("buy taser;buy deagle")
+        engine.execute_client_cmd("buy deagle;buy taser;buy defuser")
     end
     b_last_state = is_b_pressed
     
