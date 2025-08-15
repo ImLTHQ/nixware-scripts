@@ -24,7 +24,6 @@ local KEYS = {
     z = 0x5A,
     c = 0x43,
     v = 0x56,
-    t = 0x54,
 }
 
 local DEFAULT_YAW = 180
@@ -51,7 +50,6 @@ local page_up_last_state = false
 local page_down_last_state = false
 local z_last_state = false
 local c_last_state = false
-local t_last_state = false
 
 -- 初始化字体
 local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 30, 500)
@@ -119,7 +117,6 @@ local kill = 0
 engine.execute_client_cmd("unbind z")
 engine.execute_client_cmd("unbind c")
 engine.execute_client_cmd("unbind v")
-engine.execute_client_cmd("unbind t")
 
 -- 击杀播报回调
 register_callback("player_death", function(event)
@@ -183,14 +180,7 @@ register_callback("paint", function()
         kill_message_enabled = not kill_message_enabled
     end
     v_last_state = is_v_pressed
-    
-    -- 检测T键按下（快捷购买功能）
-    local is_t_pressed = is_key_pressed(KEYS.t)
-    if is_t_pressed and not t_last_state then
-        engine.execute_client_cmd("buy taser;buy defuser")
-    end
-    t_last_state = is_t_pressed
-    
+
     -- 根据开关状态设置旋转速度（使用全局变量ROTATION_SPEED）
     if rotate_left then
         rotation_speed = ROTATION_SPEED  -- 左旋
@@ -242,22 +232,15 @@ register_callback("paint", function()
     render.text(kill_message_text, font, kill_message_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text(kill_message_text, font, kill_message_position, kill_message_color, 18)
 
-    -- 渲染T键快捷购买提示文字
-    local auto_buy_text = "[T] 快捷购买"
-    local auto_buy_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
-    -- 绘制带阴影的提示文字
-    render.text(auto_buy_text, font, auto_buy_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
-    render.text(auto_buy_text, font, auto_buy_position, color_t(1, 1, 1, 1), 18)
-
     -- 渲染Page Up键状态（群广告）
-    local page_up_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 160)
+    local page_up_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
     local page_up_color = page_up_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     -- 绘制带阴影的状态指示文字
     render.text("[PgUp] 群广告", font, page_up_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text("[PgUp] 群广告", font, page_up_text_position, page_up_color, 18)
 
     -- 渲染Page Down键状态（卡网广告）
-    local page_down_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 180)
+    local page_down_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 160)
     local page_down_color = page_down_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     -- 绘制带阴影的状态指示文字
     render.text("[PgDn] 卡网广告", font, page_down_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
