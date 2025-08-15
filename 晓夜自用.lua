@@ -10,9 +10,9 @@ local welcome_messages = {
 }
 
 -- 消息发送控制变量
-local message_sent = false  -- 是否已发送过欢迎消息
 local message_index = 1     -- 当前要发送的消息索引
 local next_send_time = 0    -- 下一条消息的发送时间
+local sending_messages = false  -- 是否正在发送消息序列
 
 -- 定义按键的虚拟键码
 local KEYS = {
@@ -22,7 +22,7 @@ local KEYS = {
     z = 0x5A,
     c = 0x43,
     v = 0x56,  -- V键的虚拟键码
-    t = 0x54   -- 添加T键的虚拟键码
+    t = 0x54   -- T键的虚拟键码
 }
 
 local DEFAULT_YAW = 180
@@ -147,10 +147,31 @@ local function update_rotation()
     return current_yaw
 end
 
--- 发送欢迎消息的函数
-local function send_welcome_messages()
-    for i, msg in ipairs(welcome_messages) do
-        engine.execute_client_cmd("say " .. msg)
+-- 开始发送欢迎消息序列
+local function start_sending_welcome_messages()
+    if not sending_messages then
+        sending_messages = true
+        message_index = 1
+        next_send_time = os.clock()  -- 立即发送第一条消息
+    end
+end
+
+-- 处理消息发送逻辑
+local function process_message_sending(current_time)
+    if sending_messages and current_time >= next_send_time then
+        -- 发送当前消息
+        engine.execute_client_cmd("say " .. welcome_messages[message_index])
+        
+        -- 准备下一条消息
+        message_index = message_index + 1
+        
+        -- 如果所有消息都已发送，则结束序列
+        if message_index > #welcome_messages then
+            sending_messages = false
+        else
+            -- 否则设置3秒后发送下一条
+            next_send_time = current_time + 3
+        end
     end
 end
 
@@ -194,12 +215,15 @@ register_callback("paint", function()
     end
     v_last_state = is_v_pressed
 
-    -- 检测T键状态（发送欢迎消息）
+    -- 检测T键状态（开始发送欢迎消息序列）
     local is_t_pressed = is_key_pressed(KEYS.t)
     if is_t_pressed and not t_last_state then
-        send_welcome_messages()
+        start_sending_welcome_messages()
     end
     t_last_state = is_t_pressed
+
+    -- 处理消息发送
+    process_message_sending(current_time)
 
     -- 根据开关状态设置旋转速度（使用全局变量ROTATION_SPEED）
     if rotate_left then
@@ -251,7 +275,7 @@ register_callback("paint", function()
 
     -- 渲染T键自我介绍
     local t_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
-    local t_color = color_t(1, 1, 1, 1)  -- T键不需要状态颜色变化
+    local t_color = sending_messages and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     render.text("[T] 自我介绍", font, t_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text("[T] 自我介绍", font, t_text_position, t_color, 18)
 
@@ -281,31 +305,14 @@ register_callback("paint", function()
     if not local_player then
         menu.ragebot_anti_aim = false
         kill = 0
-        message_sent = false
         message_index = 1
+        sending_messages = false
         rotate_left = false
         rotate_right = false
         page_up_enabled = false
         page_down_enabled = false
         kill_message_enabled = false  -- 本地玩家不存在时关闭击杀播报
     else
-        -- 处理欢迎消息发送（移除了20秒延迟）
-        if not message_sent then
-            if message_index == 1 then
-                next_send_time = current_time  -- 立即发送第一条消息
-                message_index = message_index + 1
-            elseif current_time >= next_send_time then
-                engine.execute_client_cmd("say " .. welcome_messages[message_index - 1])
-                
-                if (message_index - 1) < #welcome_messages then
-                    next_send_time = current_time + 3
-                    message_index = message_index + 1
-                else
-                    message_sent = true
-                end
-            end
-        end
-        
         -- 空格按住时开启AA
         local is_space_pressed = is_key_pressed(KEYS.space)
         menu.ragebot_anti_aim = is_space_pressed
