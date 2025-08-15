@@ -151,15 +151,14 @@ end
 
 -- 开始发送欢迎消息序列（自我介绍）
 local function start_sending_welcome_messages()
-    if not sending_messages then
-        -- 启动自我介绍时，关闭广告
-        page_up_enabled = false    -- 关闭群广告
-        page_down_enabled = false  -- 关闭卡网广告
-        
-        sending_messages = true
-        message_index = 1
-        next_send_time = os.clock()  -- 立即发送第一条消息
-    end
+    -- 无论之前是否在发送，都重新开始
+    sending_messages = true
+    message_index = 1
+    next_send_time = os.clock()  -- 立即发送第一条消息
+    
+    -- 启动自我介绍时，关闭广告
+    page_up_enabled = false    -- 关闭群广告
+    page_down_enabled = false  -- 关闭卡网广告
 end
 
 -- 处理消息发送逻辑
@@ -222,10 +221,16 @@ register_callback("paint", function()
     end
     home_last_state = is_home_pressed
 
-    -- 检测End键状态（开始发送欢迎消息序列）
+    -- 检测End键状态（控制自我介绍发送：按一下开始或重新开始，再按一下停止）
     local is_end_pressed = is_key_pressed(KEYS["end"])  -- 使用字符串索引访问end键
     if is_end_pressed and not end_last_state then
-        start_sending_welcome_messages()
+        if sending_messages then
+            -- 如果正在发送，则停止
+            sending_messages = false
+        else
+            -- 如果没有发送，则开始发送
+            start_sending_welcome_messages()
+        end
     end
     end_last_state = is_end_pressed
 
