@@ -24,7 +24,7 @@ local KEYS = {
     z = 0x5A,
     c = 0x43,
     v = 0x56,
-    q = 0x51,
+    t = 0x54,
 }
 
 local DEFAULT_YAW = 180
@@ -51,7 +51,7 @@ local page_up_last_state = false
 local page_down_last_state = false
 local z_last_state = false
 local c_last_state = false
-local q_last_state = false
+local t_last_state = false
 
 -- 初始化字体
 local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 30, 500)
@@ -149,7 +149,7 @@ register_callback("paint", function()
     engine.execute_client_cmd("unbind z")
     engine.execute_client_cmd("unbind c")
     engine.execute_client_cmd("unbind v")
-    engine.execute_client_cmd("unbind q")
+    engine.execute_client_cmd("unbind t")
 
     local local_player = entitylist.get_local_player_pawn()
     local current_time = os.clock()  -- 使用os.clock()获取时间
@@ -184,12 +184,12 @@ register_callback("paint", function()
     end
     v_last_state = is_v_pressed
     
-    -- 检测Q键按下（自动购买功能）
-    local is_q_pressed = is_key_pressed(KEYS.q)
-    if is_q_pressed and not q_last_state then
+    -- 检测T键按下（快捷购买功能）
+    local is_t_pressed = is_key_pressed(KEYS.t)
+    if is_t_pressed and not t_last_state then
         engine.execute_client_cmd("buy taser;buy defuser")
     end
-    q_last_state = is_q_pressed
+    t_last_state = is_t_pressed
     
     -- 根据开关状态设置旋转速度（使用全局变量ROTATION_SPEED）
     if rotate_left then
@@ -242,8 +242,8 @@ register_callback("paint", function()
     render.text(kill_message_text, font, kill_message_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text(kill_message_text, font, kill_message_position, kill_message_color, 18)
 
-    -- 渲染Q键自动购买提示文字
-    local auto_buy_text = "[Q] 快捷购买"
+    -- 渲染T键快捷购买提示文字
+    local auto_buy_text = "[T] 快捷购买"
     local auto_buy_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
     -- 绘制带阴影的提示文字
     render.text(auto_buy_text, font, auto_buy_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
