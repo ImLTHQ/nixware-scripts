@@ -24,7 +24,7 @@ local KEYS = {
     z = 0x5A,
     c = 0x43,
     v = 0x56,
-    b = 0x42,
+    l = 0x4C,
 }
 
 local DEFAULT_YAW = 180
@@ -51,7 +51,7 @@ local page_up_last_state = false
 local page_down_last_state = false
 local z_last_state = false
 local c_last_state = false
-local b_last_state = false
+local l_last_state = false
 
 -- 初始化字体
 local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 30, 500)
@@ -149,7 +149,7 @@ register_callback("paint", function()
     engine.execute_client_cmd("unbind z")
     engine.execute_client_cmd("unbind c")
     engine.execute_client_cmd("unbind v")
-    engine.execute_client_cmd("unbind b")
+    engine.execute_client_cmd("unbind l")
 
     local local_player = entitylist.get_local_player_pawn()
     local current_time = os.clock()  -- 使用os.clock()获取时间
@@ -184,13 +184,12 @@ register_callback("paint", function()
     end
     v_last_state = is_v_pressed
     
-    -- 检测B键按下（自动购买功能）
-    local is_b_pressed = is_key_pressed(KEYS.b)
-    if is_b_pressed and not b_last_state then
-        -- 按下B键时执行购买命令
-        engine.execute_client_cmd("buy deagle;buy taser;buy defuser")
+    -- 检测L键按下
+    local is_l_pressed = is_key_pressed(KEYS.l)
+    if is_l_pressed and not l_last_state then
+        engine.execute_client_cmd("buy taser;buy defuser")
     end
-    b_last_state = is_b_pressed
+    l_last_state = is_l_pressed
     
     -- 根据开关状态设置旋转速度（使用全局变量ROTATION_SPEED）
     if rotate_left then
@@ -243,10 +242,10 @@ register_callback("paint", function()
     render.text(kill_message_text, font, kill_message_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text(kill_message_text, font, kill_message_position, kill_message_color, 18)
 
-    -- 渲染B键自动购买提示文字
-    local auto_buy_text = "[B] 自动购买"
+    -- 渲染L键自动购买提示文字
+    local auto_buy_text = "[L] 自动购买"
     local auto_buy_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
-    -- 绘制带阴影的提示文字（B键功能是触发式，不是开关，所以保持白色）
+    -- 绘制带阴影的提示文字
     render.text(auto_buy_text, font, auto_buy_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text(auto_buy_text, font, auto_buy_position, color_t(1, 1, 1, 1), 18)
 
