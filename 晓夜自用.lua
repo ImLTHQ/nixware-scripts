@@ -9,8 +9,6 @@ local welcome_messages = {
     "My name is Sakurajima Hatsuyuki",
 }
 
-local delay_time = 20
-
 -- 消息发送控制变量
 local message_sent = false  -- 是否已发送过欢迎消息
 local message_index = 1     -- 当前要发送的消息索引
@@ -24,6 +22,7 @@ local KEYS = {
     z = 0x5A,
     c = 0x43,
     v = 0x56,  -- V键的虚拟键码
+    t = 0x54   -- 添加T键的虚拟键码
 }
 
 local DEFAULT_YAW = 180
@@ -50,6 +49,7 @@ local page_up_last_state = false
 local page_down_last_state = false
 local z_last_state = false
 local c_last_state = false
+local t_last_state = false  -- 用于T键状态检测
 
 -- 初始化字体
 local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 30, 500)
@@ -117,6 +117,7 @@ local kill = 0
 engine.execute_client_cmd("unbind z")
 engine.execute_client_cmd("unbind c")
 engine.execute_client_cmd("unbind v")  -- 解除V键默认绑定
+engine.execute_client_cmd("unbind t")  -- 解除T键默认绑定
 
 -- 击杀播报回调，添加开关控制
 register_callback("player_death", function(event)
@@ -144,6 +145,13 @@ local function update_rotation()
     end
     
     return current_yaw
+end
+
+-- 发送欢迎消息的函数
+local function send_welcome_messages()
+    for i, msg in ipairs(welcome_messages) do
+        engine.execute_client_cmd("say " .. msg)
+    end
 end
 
 -- 主循环回调
@@ -185,6 +193,13 @@ register_callback("paint", function()
         end
     end
     v_last_state = is_v_pressed
+
+    -- 检测T键状态（发送欢迎消息）
+    local is_t_pressed = is_key_pressed(KEYS.t)
+    if is_t_pressed and not t_last_state then
+        send_welcome_messages()
+    end
+    t_last_state = is_t_pressed
 
     -- 根据开关状态设置旋转速度（使用全局变量ROTATION_SPEED）
     if rotate_left then
@@ -228,11 +243,17 @@ register_callback("paint", function()
     render.text(rotation_text, font, rotation_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text(rotation_text, font, rotation_text_position, rotation_color, 18)
 
-    -- 渲染V键击杀播报状态（位于旋转和群广告中间）
+    -- 渲染V键击杀播报状态
     local kill_message_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 120)
     local kill_message_color = kill_message_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     render.text("[V] 击杀播报", font, kill_message_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text("[V] 击杀播报", font, kill_message_text_position, kill_message_color, 18)
+
+    -- 渲染T键自我介绍
+    local t_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 130)
+    local t_color = color_t(1, 1, 1, 1)  -- T键不需要状态颜色变化
+    render.text("[T] 自我介绍", font, t_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
+    render.text("[T] 自我介绍", font, t_text_position, t_color, 18)
 
     -- 渲染Page Up键状态（群广告）
     local page_up_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
@@ -268,10 +289,10 @@ register_callback("paint", function()
         page_down_enabled = false
         kill_message_enabled = false  -- 本地玩家不存在时关闭击杀播报
     else
-        -- 处理欢迎消息发送
+        -- 处理欢迎消息发送（移除了20秒延迟）
         if not message_sent then
             if message_index == 1 then
-                next_send_time = current_time + delay_time
+                next_send_time = current_time  -- 立即发送第一条消息
                 message_index = message_index + 1
             elseif current_time >= next_send_time then
                 engine.execute_client_cmd("say " .. welcome_messages[message_index - 1])
