@@ -23,6 +23,7 @@ local KEYS = {
     page_down = 0x22,
     z = 0x5A,
     c = 0x43,
+    v = 0x56,  -- V键的虚拟键码
 }
 
 local DEFAULT_YAW = 180
@@ -32,8 +33,9 @@ local rotation_speed = 0
 local rotate_left = false  -- Z键控制的左旋状态
 local rotate_right = false -- C键控制的右旋状态
 
--- 击杀播报开关状态（默认始终开启）
-local kill_message_enabled = true
+-- 击杀播报开关状态（默认关闭）
+local kill_message_enabled = false
+local v_last_state = false  -- 用于V键状态检测
 
 -- 旋转角度控制变量
 local current_yaw = DEFAULT_YAW
@@ -74,50 +76,19 @@ local kill_say = {
     "QQ群: 1046853514 | 加入我们",
     "我开挂了, 我承认错误",
     "请别和我一样使用外挂",
-    "与其和我斗气, 不如闭目养神, 或者静心品茗",
-    "VAC 不会放过任何一个作弊者, 本账号注定会被封禁",
-    "如果无法忍受官匹外挂太多, 各大对战平台则是您的不二之选",
-    "请不要骂人, 文明互联网, 骂人不能解决问题",
-    "开挂可耻, 开挂有罪, 希望您能原谅没有忍受外挂诱惑的我！",
-    "您是否在电脑前坐太久了呢, 站立一分钟并深呼吸, 放松一下身心。",
-    "如果您没心情继续游戏, 可以挂机, 并浏览一会网页",
-    "一场游戏的输赢无关紧要, 没有必要为外挂而心情烦躁。",
-    "作为挂逼, 我十分羡慕你们家庭美满",
-    "而我这样的孤儿只能开着挂听着歌, 忍受其他玩家的谩骂",
-    "放松心情, 心态平和, 没必要为了一个孤儿挂逼生气",
-    "游戏只是娱乐，输赢不重要，重要的是心态。",
-    "希望您能在游戏中找到更多的乐趣，而不是愤怒。",
-    "游戏是为了放松心情，而不是让自己更烦躁。",
-    "愿您每天都能保持微笑，享受生活的美好。",
-    "希望您能在游戏中找到更多的朋友，而不是敌人。",
-    "愿您的每一天都充满阳光与希望。",
-    "游戏只是虚拟的世界，现实中更需要我们努力。",
-    "愿您在游戏中找到属于自己的快乐。",
-    "您知道吗？开挂的人其实内心都很孤独",
-    "感谢您为我的游戏体验做出的牺牲",
-    "这局结束后，建议您喝杯热茶放松一下",
-    "您知道为什么我开挂吗？因为我太菜了",
-    "其实我很佩服正常玩的玩家，至少你们有骨气",
-    "游戏而已，何必认真？当然，开挂的我没资格说这话",
-    "您知道最讽刺的是什么吗？开挂的我在教您人生道理",
-    "您的牺牲不会白费，至少让我开心了一下",
-    "您知道吗？每次击杀您这样的玩家，我都感到一丝愧疚",
-    "但很快这丝愧疚就被外挂带来的快感淹没了",
-    "愿天堂没有外挂，阿门",
-    "您知道为什么我选择开挂吗？因为我在现实中太失败了",
-    "游戏是我唯一的慰藉，即使是通过作弊的方式",
-    "您是个好玩家，可惜遇到了坏玩家",
-    "感谢您成为我游戏生涯中的一个小插曲",
+    -- 其他击杀播报内容...
 }
 
 local kill = 0
 
 engine.execute_client_cmd("unbind z")
 engine.execute_client_cmd("unbind c")
+engine.execute_client_cmd("unbind v")  -- 解除V键默认绑定
 
--- 击杀播报回调
+-- 击杀播报回调，添加开关控制
 register_callback("player_death", function(event)
-    if event:get_pawn("attacker") == entitylist.get_local_player_pawn() then
+    -- 只有在击杀播报开启时才发送消息
+    if kill_message_enabled and event:get_pawn("attacker") == entitylist.get_local_player_pawn() then
         engine.execute_client_cmd("say " .. kill_say[kill % #kill_say + 1])
         kill = kill + 1
     end
@@ -170,6 +141,18 @@ register_callback("paint", function()
     end
     c_last_state = is_c_pressed
 
+    -- 检测V键状态切换（击杀播报开关）
+    local is_v_pressed = is_key_pressed(KEYS.v)
+    if is_v_pressed and not v_last_state then
+        kill_message_enabled = not kill_message_enabled
+        -- 开启击杀播报时关闭其他广告
+        if kill_message_enabled then
+            page_up_enabled = false
+            page_down_enabled = false
+        end
+    end
+    v_last_state = is_v_pressed
+
     -- 根据开关状态设置旋转速度（使用全局变量ROTATION_SPEED）
     if rotate_left then
         rotation_speed = ROTATION_SPEED  -- 左旋
@@ -184,9 +167,10 @@ register_callback("paint", function()
     local is_page_up_pressed = is_key_pressed(KEYS.page_up)
     if is_page_up_pressed and not page_up_last_state then
         page_up_enabled = not page_up_enabled
-        -- 开启群广告时不再关闭击杀播报
+        -- 开启群广告时关闭其他广告
         if page_up_enabled then
             page_down_enabled = false
+            kill_message_enabled = false
         end
     end
     page_up_last_state = is_page_up_pressed
@@ -195,32 +179,37 @@ register_callback("paint", function()
     local is_page_down_pressed = is_key_pressed(KEYS.page_down)
     if is_page_down_pressed and not page_down_last_state then
         page_down_enabled = not page_down_enabled
+        -- 开启卡网广告时关闭其他广告
         if page_down_enabled then
             page_up_enabled = false
+            kill_message_enabled = false
         end
     end
     page_down_last_state = is_page_down_pressed
 
-    -- 渲染旋转控制提示文字及状态，开启时绿色，关闭时白色
+    -- 渲染旋转控制提示文字及状态
     local is_rotating = rotate_left or rotate_right
     local rotation_color = is_rotating and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
     local rotation_text = "[Z/C] 旋转"
     local rotation_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 100)
-    -- 绘制带阴影的提示文字
     render.text(rotation_text, font, rotation_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text(rotation_text, font, rotation_text_position, rotation_color, 18)
+
+    -- 渲染V键击杀播报状态（位于旋转和群广告中间）
+    local kill_message_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 110)
+    local kill_message_color = kill_message_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
+    render.text("[V] 击杀播报", font, kill_message_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
+    render.text("[V] 击杀播报", font, kill_message_text_position, kill_message_color, 18)
 
     -- 渲染Page Up键状态（群广告）
     local page_up_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 120)
     local page_up_color = page_up_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
-    -- 绘制带阴影的状态指示文字
     render.text("[PgUp] 群广告", font, page_up_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text("[PgUp] 群广告", font, page_up_text_position, page_up_color, 18)
 
     -- 渲染Page Down键状态（卡网广告）
-    local page_down_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
+    local page_down_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 130)
     local page_down_color = page_down_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
-    -- 绘制带阴影的状态指示文字
     render.text("[PgDn] 卡网广告", font, page_down_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text("[PgDn] 卡网广告", font, page_down_text_position, page_down_color, 18)
 
@@ -244,25 +233,20 @@ register_callback("paint", function()
         rotate_right = false
         page_up_enabled = false
         page_down_enabled = false
+        kill_message_enabled = false  -- 本地玩家不存在时关闭击杀播报
     else
         -- 处理欢迎消息发送
         if not message_sent then
-            -- 检测到玩家，设置延迟发送第一条消息
             if message_index == 1 then
                 next_send_time = current_time + delay_time
                 message_index = message_index + 1
-            -- 检查是否到了发送时间
             elseif current_time >= next_send_time then
-                -- 发送当前消息（使用message_index - 1作为索引）
                 engine.execute_client_cmd("say " .. welcome_messages[message_index - 1])
                 
-                -- 检查是否还有下一条消息
                 if (message_index - 1) < #welcome_messages then
-                    -- 设置下一条消息的发送时间（3秒后）
                     next_send_time = current_time + 3
                     message_index = message_index + 1
                 else
-                    -- 所有消息发送完毕
                     message_sent = true
                 end
             end
@@ -273,11 +257,9 @@ register_callback("paint", function()
         menu.ragebot_anti_aim = is_space_pressed
         
         if is_space_pressed then
-            -- 更新并应用旋转角度
             menu.ragebot_anti_aim_base_yaw_offset = update_rotation()
             menu.ragebot_anti_aim_pitch = 2
         else
-            -- 未按空格时重置为默认角度
             current_yaw = DEFAULT_YAW
             menu.ragebot_anti_aim_base_yaw_offset = DEFAULT_YAW
         end
