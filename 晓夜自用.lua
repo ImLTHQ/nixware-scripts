@@ -116,6 +116,11 @@ local kill_say = {
 
 local kill = 0
 
+engine.execute_client_cmd("unbind z")
+engine.execute_client_cmd("unbind c")
+engine.execute_client_cmd("unbind v")
+engine.execute_client_cmd("unbind t")
+
 -- 击杀播报回调
 register_callback("player_death", function(event)
     -- 只有当击杀播报开启时，才发送消息
@@ -146,11 +151,6 @@ end
 
 -- 主循环回调
 register_callback("paint", function()
-    engine.execute_client_cmd("unbind z")
-    engine.execute_client_cmd("unbind c")
-    engine.execute_client_cmd("unbind v")
-    engine.execute_client_cmd("unbind t")
-
     local local_player = entitylist.get_local_player_pawn()
     local current_time = os.clock()  -- 使用os.clock()获取时间
     local screen_size = render.screen_size()
