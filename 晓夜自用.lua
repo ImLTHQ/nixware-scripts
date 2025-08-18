@@ -46,7 +46,13 @@ local page_down_enabled = false -- 卡网广告开关
 local AD_INTERVAL = 3  -- 广告发送间隔(秒)，避免过于频繁
 local next_page_up_time = 0  -- 下一次群广告发送时间
 local next_page_down_time = 0  -- 下一次卡网广告发送时间
+local page_up_message_index = 1  -- 群广告当前消息索引
 local page_down_message_index = 1  -- 卡网广告当前消息索引
+
+-- 群广告消息列表
+local page_up_messages = {
+    "QQ群: 1046853514 | 加入我们",
+}
 
 -- 卡网广告消息列表
 local page_down_messages = {
@@ -268,6 +274,7 @@ register_callback("paint", function()
             kill_message_enabled = false
             sending_messages = false  -- 关闭自我介绍
             next_page_up_time = current_time  -- 立即发送第一条
+            page_up_message_index = 1  -- 重置消息索引
         end
     end
     page_up_last_state = is_page_up_pressed
@@ -319,10 +326,19 @@ register_callback("paint", function()
     render.text("[PgDn] 卡网广告", font, page_down_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text("[PgDn] 卡网广告", font, page_down_text_position, page_down_color, 18)
 
-    -- 当Page Up开关开启时发送群广告（带频率控制）
+    -- 当Page Up开关开启时发送群广告（带频率控制，多条消息轮流发送）
     if page_up_enabled and current_time >= next_page_up_time then
-        engine.execute_client_cmd("say QQ群: 1046853514 | 加入我们")
-        next_page_up_time = current_time + AD_INTERVAL  -- 间隔AD_INTERVAL秒后才能再次发送
+        -- 发送当前索引的消息
+        engine.execute_client_cmd("say " .. page_up_messages[page_up_message_index])
+        
+        -- 更新下一条消息的索引，循环显示
+        page_up_message_index = page_up_message_index + 1
+        if page_up_message_index > #page_up_messages then
+            page_up_message_index = 1
+        end
+        
+        -- 设置下一次发送时间
+        next_page_up_time = current_time + AD_INTERVAL
     end
 
     -- 当Page Down开关开启时发送卡网广告（带间隔控制，两条消息轮流发送）
