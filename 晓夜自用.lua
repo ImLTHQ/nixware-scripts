@@ -40,9 +40,12 @@ local home_last_state = false  -- 用于Home键状态检测
 local current_yaw = DEFAULT_YAW
 local last_update_time = os.clock()
 
--- 广告开关状态，默认关闭
-local page_up_enabled = false  -- 群广告
-local page_down_enabled = false -- 卡网广告
+-- 广告相关设置
+local page_up_enabled = false  -- 群广告开关
+local page_down_enabled = false -- 卡网广告开关
+local AD_INTERVAL = 3  -- 广告发送间隔(秒)，避免过于频繁
+local next_page_up_time = 0  -- 下一次群广告发送时间
+local next_page_down_time = 0  -- 下一次卡网广告发送时间
 
 -- 用于防止重复触发的状态记录
 local page_up_last_state = false
@@ -156,9 +159,10 @@ local function start_sending_welcome_messages()
     message_index = 1
     next_send_time = os.clock()  -- 立即发送第一条消息
     
-    -- 启动自我介绍时，关闭广告
+    -- 启动自我介绍时，关闭其他互斥功能
     page_up_enabled = false    -- 关闭群广告
     page_down_enabled = false  -- 关闭卡网广告
+    kill_message_enabled = false -- 关闭击杀播报
 end
 
 -- 处理消息发送逻辑
@@ -212,7 +216,7 @@ register_callback("paint", function()
     local is_home_pressed = is_key_pressed(KEYS.home)
     if is_home_pressed and not home_last_state then
         kill_message_enabled = not kill_message_enabled
-        -- 开启击杀播报时关闭其他广告
+        -- 开启击杀播报时关闭其他互斥功能
         if kill_message_enabled then
             page_up_enabled = false
             page_down_enabled = false
@@ -251,11 +255,12 @@ register_callback("paint", function()
     local is_page_up_pressed = is_key_pressed(KEYS.page_up)
     if is_page_up_pressed and not page_up_last_state then
         page_up_enabled = not page_up_enabled
-        -- 开启群广告时关闭其他广告和自我介绍
+        -- 开启群广告时关闭其他互斥功能
         if page_up_enabled then
             page_down_enabled = false
             kill_message_enabled = false
             sending_messages = false  -- 关闭自我介绍
+            next_page_up_time = current_time  -- 立即发送第一条
         end
     end
     page_up_last_state = is_page_up_pressed
@@ -264,11 +269,12 @@ register_callback("paint", function()
     local is_page_down_pressed = is_key_pressed(KEYS.page_down)
     if is_page_down_pressed and not page_down_last_state then
         page_down_enabled = not page_down_enabled
-        -- 开启卡网广告时关闭其他广告和自我介绍
+        -- 开启卡网广告时关闭其他互斥功能
         if page_down_enabled then
             page_up_enabled = false
             kill_message_enabled = false
             sending_messages = false  -- 关闭自我介绍
+            next_page_down_time = current_time  -- 立即发送第一条
         end
     end
     page_down_last_state = is_page_down_pressed
@@ -305,14 +311,16 @@ register_callback("paint", function()
     render.text("[PgDn] 卡网广告", font, page_down_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text("[PgDn] 卡网广告", font, page_down_text_position, page_down_color, 18)
 
-    -- 当Page Up开关开启时发送群广告
-    if page_up_enabled then
+    -- 当Page Up开关开启时发送群广告（带频率控制）
+    if page_up_enabled and current_time >= next_page_up_time then
         engine.execute_client_cmd("say QQ群: 1046853514 | 加入我们")
+        next_page_up_time = current_time + AD_INTERVAL  -- 间隔AD_INTERVAL秒后才能再次发送
     end
 
-    -- 当Page Down开关开启时发送网址
-    if page_down_enabled then
+    -- 当Page Down开关开启时发送网址（带频率控制）
+    if page_down_enabled and current_time >= next_page_down_time then
         engine.execute_client_cmd("say 网址: cxs.hvh.asia | 续费外挂")
+        next_page_down_time = current_time + AD_INTERVAL  -- 间隔AD_INTERVAL秒后才能再次发送
     end
     
     -- 如果本地玩家不存在，则重置状态
