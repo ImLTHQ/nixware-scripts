@@ -46,6 +46,13 @@ local page_down_enabled = false -- 卡网广告开关
 local AD_INTERVAL = 3  -- 广告发送间隔(秒)，避免过于频繁
 local next_page_up_time = 0  -- 下一次群广告发送时间
 local next_page_down_time = 0  -- 下一次卡网广告发送时间
+local page_down_message_index = 1  -- 卡网广告当前消息索引
+
+-- 卡网广告消息列表
+local page_down_messages = {
+    "网址: cxs.hvh.asia | 续费外挂",
+    "网址: 长相思.我爱你 | 购买白/黑号 | 新店开业 | 超级便宜"
+}
 
 -- 用于防止重复触发的状态记录
 local page_up_last_state = false
@@ -275,6 +282,7 @@ register_callback("paint", function()
             kill_message_enabled = false
             sending_messages = false  -- 关闭自我介绍
             next_page_down_time = current_time  -- 立即发送第一条
+            page_down_message_index = 1  -- 重置消息索引
         end
     end
     page_down_last_state = is_page_down_pressed
@@ -317,11 +325,18 @@ register_callback("paint", function()
         next_page_up_time = current_time + AD_INTERVAL  -- 间隔AD_INTERVAL秒后才能再次发送
     end
 
-    -- 当Page Down开关开启时发送网址（带频率控制）
+    -- 当Page Down开关开启时发送卡网广告（带间隔控制，两条消息轮流发送）
     if page_down_enabled and current_time >= next_page_down_time then
-        engine.execute_client_cmd("say 网址: cxs.hvh.asia | 续费外挂")
-        next_page_down_time = current_time + AD_INTERVAL
-        engine.execute_client_cmd("say 网址: 长相思.我爱你 | 购买白/黑号 | 新店开业 | 超级便宜")
+        -- 发送当前索引的消息
+        engine.execute_client_cmd("say " .. page_down_messages[page_down_message_index])
+        
+        -- 更新下一条消息的索引，循环显示
+        page_down_message_index = page_down_message_index + 1
+        if page_down_message_index > #page_down_messages then
+            page_down_message_index = 1
+        end
+        
+        -- 设置下一次发送时间
         next_page_down_time = current_time + AD_INTERVAL
     end
     
