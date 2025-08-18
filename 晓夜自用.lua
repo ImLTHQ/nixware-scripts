@@ -320,7 +320,7 @@ register_callback("paint", function()
     -- 当Page Down开关开启时发送网址（带频率控制）
     if page_down_enabled and current_time >= next_page_down_time then
         engine.execute_client_cmd("say 网址: cxs.hvh.asia | 续费外挂")
-        next_page_down_time = current_time + AD_INTERVAL  -- 间隔AD_INTERVAL秒后才能再次发送
+        next_page_down_time = current_time + AD_INTERVAL
         engine.execute_client_cmd("say 网址: 长相思.我爱你 | 购买白/黑号 | 新店开业 | 超级便宜")
         next_page_down_time = current_time + AD_INTERVAL
     end
