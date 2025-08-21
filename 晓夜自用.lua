@@ -1,5 +1,5 @@
 -- 定义旋转速度
-local ROTATION_SPEED = 1440  -- 旋转速度，单位：度/秒
+local ROTATION_SPEED = 3600  -- 旋转速度，单位：度/秒
 
 -- 定义需要发送的消息（自我介绍）
 local welcome_messages = {
