@@ -7,7 +7,6 @@ local welcome_messages = {
     "我来自日本",
     "I come from Japan",
     "My name is Sakurajima Hatsuyuki",
-    "私は日本から来ました",
     "私の名前は桜島初雪です",
     "Я пришел из Японии",
     "Меня зовут Сакурайма Хатсуюки",
