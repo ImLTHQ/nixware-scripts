@@ -1,5 +1,5 @@
--- 定义旋转速度（圈/秒）
-local DEFAULT_ROTATION_SPEED = 2  -- 默认旋转速度，单位：圈/秒
+-- 定义旋转速度（圈/秒）- 每次加减都是上一次的两倍
+local DEFAULT_ROTATION_SPEED = 1  -- 默认旋转速度，单位：圈/秒
 local current_rotation_speed = DEFAULT_ROTATION_SPEED  -- 当前旋转速度
 
 -- 定义需要发送的消息（自我介绍）
@@ -263,17 +263,19 @@ register_callback("paint", function()
     end
     end_last_state = is_end_pressed
 
-    -- 检测"-"键状态（减速旋转速度）
+    -- 检测"-"键状态（减速旋转速度）- 每次减半，最低为1
     local is_minus_pressed = is_key_pressed(KEYS.minus)
     if is_minus_pressed and not minus_last_state then
-        current_rotation_speed = math.max(0, current_rotation_speed - 1)
+        -- 速度减半，但不低于1
+        current_rotation_speed = math.max(1, current_rotation_speed / 2)
     end
     minus_last_state = is_minus_pressed
 
-    -- 检测"="键状态（加速旋转速度）
+    -- 检测"="键状态（加速旋转速度）- 每次加倍，最高为64
     local is_equal_pressed = is_key_pressed(KEYS.equal)
     if is_equal_pressed and not equal_last_state then
-        current_rotation_speed = current_rotation_speed + 1
+        -- 速度加倍，但不超过64
+        current_rotation_speed = math.min(64, current_rotation_speed * 2)
     end
     equal_last_state = is_equal_pressed
 
