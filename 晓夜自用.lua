@@ -1,5 +1,5 @@
 -- 定义旋转速度（圈/秒）
-local DEFAULT_ROTATION_SPEED = 1  -- 默认旋转速度，单位：圈/秒
+local DEFAULT_ROTATION_SPEED = 2  -- 默认旋转速度，单位：圈/秒
 local current_rotation_speed = DEFAULT_ROTATION_SPEED  -- 当前旋转速度
 
 -- 定义需要发送的消息（自我介绍）
@@ -158,7 +158,7 @@ register_callback("player_death", function(event)
     end
 end)
 
--- 更新旋转角度的函数
+-- 更新旋转角度的函数 - 修复了180/-180度重合问题
 local function update_rotation()
     local current_time = os.clock()
     local delta_time = current_time - last_update_time
@@ -167,11 +167,11 @@ local function update_rotation()
     -- 一圈是360度，根据圈/秒计算角度变化
     current_yaw = current_yaw + rotation_speed * 360 * delta_time
     
-    -- 确保角度在-180到180之间循环
+    -- 改进的角度循环逻辑，确保平滑过渡
+    -- 使用取模运算使角度始终保持在-180到180度之间
+    current_yaw = current_yaw % 360  -- 先将角度限制在0-360度
     if current_yaw > 180 then
-        current_yaw = -180
-    elseif current_yaw < -180 then
-        current_yaw = 180
+        current_yaw = current_yaw - 360  -- 转换为-180到180度范围
     end
     
     return current_yaw
