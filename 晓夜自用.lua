@@ -55,7 +55,6 @@ local page_down_message_index = 1  -- 卡网广告当前消息索引
 -- 群广告消息列表
 local page_up_messages = {
     "QQ群: 1046853514 | 加入我们",
-    "QQ群: 953173101 | 加入我们",
 }
 
 -- 卡网广告消息列表
