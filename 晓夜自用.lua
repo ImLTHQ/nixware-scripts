@@ -87,6 +87,8 @@ end
 menu.ragebot_anti_aim = false
 menu.ragebot_anti_aim_pitch = 2
 menu.ragebot_anti_aim_base_yaw_offset = DEFAULT_YAW
+menu.ragebot_anti_aim_base_yaw_modifier = 0
+menu.ragebot_anti_aim_base_yaw_modifier_offset = 0
 
 -- 击杀播报内容
 local kill_say = {
@@ -378,6 +380,8 @@ register_callback("paint", function()
         if is_space_pressed then
             menu.ragebot_anti_aim_base_yaw_offset = update_rotation()
             menu.ragebot_anti_aim_pitch = 2
+            menu.ragebot_anti_aim_base_yaw_modifier = 0
+            menu.ragebot_anti_aim_base_yaw_modifier_offset = 0
         else
             current_yaw = DEFAULT_YAW
             menu.ragebot_anti_aim_base_yaw_offset = DEFAULT_YAW
@@ -389,5 +393,7 @@ end)
 register_callback("unload", function()
     menu.ragebot_anti_aim_base_yaw_offset = DEFAULT_YAW
     menu.ragebot_anti_aim_pitch = 2
+    menu.ragebot_anti_aim_base_yaw_modifier = 0
+    menu.ragebot_anti_aim_base_yaw_modifier_offset = 0
     menu.ragebot_anti_aim = false
 end)
