@@ -271,11 +271,11 @@ register_callback("paint", function()
     end
     minus_last_state = is_minus_pressed
 
-    -- 检测"="键状态（加速旋转速度）- 每次加倍，最高为64
+    -- 检测"="键状态（加速旋转速度）- 每次加倍，最高为32
     local is_equal_pressed = is_key_pressed(KEYS.equal)
     if is_equal_pressed and not equal_last_state then
-        -- 速度加倍，但不超过64
-        current_rotation_speed = math.min(64, current_rotation_speed * 2)
+        -- 速度加倍，但不超过32
+        current_rotation_speed = math.min(32, current_rotation_speed * 2)
     end
     equal_last_state = is_equal_pressed
 
