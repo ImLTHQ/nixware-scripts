@@ -1,5 +1,6 @@
--- 定义旋转速度
-local ROTATION_SPEED = 1440  -- 旋转速度，单位：度/秒
+-- 定义旋转速度（圈/秒）
+local DEFAULT_ROTATION_SPEED = 1  -- 默认旋转速度，单位：圈/秒
+local current_rotation_speed = DEFAULT_ROTATION_SPEED  -- 当前旋转速度
 
 -- 定义需要发送的消息（自我介绍）
 local welcome_messages = {
@@ -25,11 +26,13 @@ local KEYS = {
     home = 0x24,              -- Home键的虚拟键码
     ["end"] = 0x23,           -- 用字符串形式定义end键，避免关键字冲突
     z = 0x5A,
-    c = 0x43
+    c = 0x43,
+    minus = 0xBD,             -- "-"键的虚拟键码
+    equal = 0xBB              -- "="键的虚拟键码
 }
 
 local DEFAULT_YAW = 180
-local rotation_speed = 0
+local rotation_speed = 0  -- 实际旋转速度（基于圈/秒计算）
 
 -- 旋转状态控制变量
 local rotate_left = false  -- Z键控制的左旋状态
@@ -69,6 +72,8 @@ local page_down_last_state = false
 local z_last_state = false
 local c_last_state = false
 local end_last_state = false  -- 用于End键状态检测
+local minus_last_state = false  -- 用于"-"键状态检测
+local equal_last_state = false  -- 用于"="键状态检测
 
 -- 初始化字体
 local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 30, 500)
@@ -141,6 +146,8 @@ engine.execute_client_cmd("unbind home")  -- 解除Home键默认绑定
 engine.execute_client_cmd("unbind end")   -- 解除End键默认绑定
 engine.execute_client_cmd("unbind pgup")  -- 解除PageUp键默认绑定
 engine.execute_client_cmd("unbind pgdn")  -- 解除PageDown键默认绑定
+engine.execute_client_cmd("unbind '-'")   -- 解除"-"键默认绑定
+engine.execute_client_cmd("unbind '='")   -- 解除"="键默认绑定
 
 -- 击杀播报回调，添加开关控制
 register_callback("player_death", function(event)
@@ -157,14 +164,14 @@ local function update_rotation()
     local delta_time = current_time - last_update_time
     last_update_time = current_time
     
-    -- 根据速度和时间差计算角度变化
-    current_yaw = current_yaw + rotation_speed * delta_time
+    -- 一圈是360度，根据圈/秒计算角度变化
+    current_yaw = current_yaw + rotation_speed * 360 * delta_time
     
     -- 确保角度在-180到180之间循环
     if current_yaw > 180 then
-        current_yaw = -180  -- 超过180度时回到-180度
+        current_yaw = -180
     elseif current_yaw < -180 then
-        current_yaw = 180   -- 低于-180度时回到180度
+        current_yaw = 180
     end
     
     return current_yaw
@@ -256,17 +263,31 @@ register_callback("paint", function()
     end
     end_last_state = is_end_pressed
 
+    -- 检测"-"键状态（减速旋转速度）
+    local is_minus_pressed = is_key_pressed(KEYS.minus)
+    if is_minus_pressed and not minus_last_state then
+        current_rotation_speed = math.max(0, current_rotation_speed - 1)
+    end
+    minus_last_state = is_minus_pressed
+
+    -- 检测"="键状态（加速旋转速度）
+    local is_equal_pressed = is_key_pressed(KEYS.equal)
+    if is_equal_pressed and not equal_last_state then
+        current_rotation_speed = current_rotation_speed + 1
+    end
+    equal_last_state = is_equal_pressed
+
     -- 处理消息发送
     process_message_sending(current_time)
 
-    -- 根据开关状态设置旋转速度（使用全局变量ROTATION_SPEED）
+    -- 根据开关状态设置旋转速度（基于当前圈/秒）
     if rotate_left then
-        rotation_speed = ROTATION_SPEED  -- 左旋
+        rotation_speed = current_rotation_speed  -- 左旋
     elseif rotate_right then
-        rotation_speed = -ROTATION_SPEED   -- 右旋
+        rotation_speed = -current_rotation_speed  -- 右旋
     else
-        rotation_speed = 0                -- 停止旋转
-        current_yaw = DEFAULT_YAW         -- 恢复默认偏移
+        rotation_speed = 0  -- 停止旋转
+        current_yaw = DEFAULT_YAW  -- 恢复默认偏移
     end
     
     -- 检测Page Up键状态切换（群广告）
@@ -299,10 +320,10 @@ register_callback("paint", function()
     end
     page_down_last_state = is_page_down_pressed
 
-    -- 渲染旋转控制提示文字及状态
+    -- 渲染旋转控制提示文字及状态，显示当前旋转速度（圈/秒）
     local is_rotating = rotate_left or rotate_right
     local rotation_color = is_rotating and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
-    local rotation_text = "[Z/C] 旋转"
+    local rotation_text = string.format("[Z/C] 旋转 - %d 圈/秒", current_rotation_speed)
     local rotation_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 100)
     render.text(rotation_text, font, rotation_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text(rotation_text, font, rotation_text_position, rotation_color, 18)
