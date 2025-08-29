@@ -1,8 +1,6 @@
--- 定义旋转速度（圈/秒）- 每次加减都是上一次的两倍
-local DEFAULT_ROTATION_SPEED = 1  -- 默认旋转速度，单位：圈/秒
-local current_rotation_speed = DEFAULT_ROTATION_SPEED  -- 当前旋转速度
+local DEFAULT_ROTATION_SPEED = 1
+local AD_INTERVAL = 1
 
--- 定义需要发送的消息（自我介绍）
 local welcome_messages = {
     "你好我的中国朋友",
     "我来自日本",
@@ -13,12 +11,41 @@ local welcome_messages = {
     "Меня зовут Сакурайма Хатсуюки",
 }
 
--- 消息发送控制变量
-local message_index = 1     -- 当前要发送的消息索引
-local next_send_time = 0    -- 下一条消息的发送时间
-local sending_messages = false  -- 是否正在发送消息序列（自我介绍）
+local page_up_messages = {
+    "QQ群: 1046853514 | 加入我们",
+}
 
--- 定义按键的虚拟键码（使用字符串键名避免关键字冲突）
+local page_down_messages = {
+    "网址: cxs.hvh.asia | 续费外挂",
+    "网址: 长相思.我爱你 | 购买白/黑号",
+}
+
+local DEFAULT_YAW = 180
+local rotation_speed = 0
+local message_index = 1
+local next_send_time = 0
+local sending_messages = false
+local current_rotation_speed = DEFAULT_ROTATION_SPEED
+local rotate_left = false
+local rotate_right = false
+local kill_message_enabled = false
+local home_last_state = false
+local current_yaw = DEFAULT_YAW
+local last_update_time = os.clock()
+local page_up_enabled = false
+local page_down_enabled = false
+local next_page_up_time = 0
+local next_page_down_time = 0
+local page_up_message_index = 1
+local page_down_message_index = 1
+local page_up_last_state = false
+local page_down_last_state = false
+local z_last_state = false
+local c_last_state = false
+local end_last_state = false
+local minus_last_state = false
+local equal_last_state = false
+
 local KEYS = {
     space = 0x20,
     page_up = 0x21,
@@ -30,50 +57,6 @@ local KEYS = {
     minus = 0xBD,             -- "-"键的虚拟键码
     equal = 0xBB              -- "="键的虚拟键码
 }
-
-local DEFAULT_YAW = 180
-local rotation_speed = 0  -- 实际旋转速度（基于圈/秒计算）
-
--- 旋转状态控制变量
-local rotate_left = false  -- Z键控制的左旋状态
-local rotate_right = false -- C键控制的右旋状态
-
--- 击杀播报开关状态（默认关闭）
-local kill_message_enabled = false
-local home_last_state = false  -- 用于Home键状态检测
-
--- 旋转角度控制变量
-local current_yaw = DEFAULT_YAW
-local last_update_time = os.clock()
-
--- 广告相关设置
-local page_up_enabled = false  -- 群广告开关
-local page_down_enabled = false -- 卡网广告开关
-local AD_INTERVAL = 3  -- 广告发送间隔(秒)，避免过于频繁
-local next_page_up_time = 0  -- 下一次群广告发送时间
-local next_page_down_time = 0  -- 下一次卡网广告发送时间
-local page_up_message_index = 1  -- 群广告当前消息索引
-local page_down_message_index = 1  -- 卡网广告当前消息索引
-
--- 群广告消息列表
-local page_up_messages = {
-    "QQ群: 1046853514 | 加入我们",
-}
-
--- 卡网广告消息列表
-local page_down_messages = {
-    "网址: cxs.hvh.asia | 续费外挂",
-    "网址: 长相思.我爱你 | 购买白/黑号",
-}
-
--- 用于防止重复触发的状态记录
-local page_up_last_state = false
-local page_down_last_state = false
-local z_last_state = false
-local c_last_state = false
-local end_last_state = false  -- 用于End键状态检测
-local minus_last_state = false  -- 用于"-"键状态检测
-local equal_last_state = false  -- 用于"="键状态检测
 
 -- 初始化字体
 local font = render.setup_font("C:\\Windows\\Fonts\\msyh.ttc", 30, 500)
@@ -97,7 +80,7 @@ menu.ragebot_anti_aim_base_yaw_modifier_offset = 0
 
 -- 击杀播报内容
 local kill_say = {
-    "nixware.cc | 您已被尊贵的 nixware 用户击杀",
+    "shark-software.ru | 您已被尊贵的 SharkHack 用户击杀",
     "我曾经带领车队一天死了 100 个号",
     "我开挂了, 我承认错误",
     "请别和我一样使用外挂",
