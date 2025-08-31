@@ -1,4 +1,4 @@
-local DEFAULT_ROTATION_SPEED = 1
+local DEFAULT_ROTATION_SPEED = 4
 local AD_INTERVAL = 1
 
 local welcome_messages = {
