@@ -12,12 +12,11 @@ local welcome_messages = {
 }
 
 local page_up_messages = {
-    "QQ群: 1046853514 | 加入我们",
+    "QQ群: 953173101 | 加入我们",
 }
 
 local page_down_messages = {
     "网址: cxs.hvh.asia | 续费外挂",
-    "网址: 长相思.我爱你 | 购买白/黑号",
 }
 
 local DEFAULT_YAW = 180
