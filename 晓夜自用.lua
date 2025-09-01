@@ -1,5 +1,5 @@
 local DEFAULT_ROTATION_SPEED = 4
-local AD_INTERVAL = 1
+local INTERVAL = 1
 
 local welcome_messages = {
     "你好我的中国朋友",
@@ -186,7 +186,7 @@ local function process_message_sending(current_time)
             sending_messages = false
         else
             -- 否则设置3秒后发送下一条
-            next_send_time = current_time + 3
+            next_send_time = current_time + INTERVAL
         end
     end
 end
@@ -348,7 +348,7 @@ register_callback("paint", function()
         end
         
         -- 设置下一次发送时间
-        next_page_up_time = current_time + AD_INTERVAL
+        next_page_up_time = current_time + INTERVAL
     end
 
     -- 当Page Down开关开启时发送卡网广告（带间隔控制，两条消息轮流发送）
@@ -363,7 +363,7 @@ register_callback("paint", function()
         end
         
         -- 设置下一次发送时间
-        next_page_down_time = current_time + AD_INTERVAL
+        next_page_down_time = current_time + INTERVAL
     end
     
     -- 如果本地玩家不存在，则重置状态
