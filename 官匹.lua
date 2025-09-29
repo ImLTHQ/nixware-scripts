@@ -47,7 +47,7 @@ local KEYS = {
     space = 0x20,
     page_up = 0x21,
     page_down = 0x22,
-    home = 0x24,              -- Home键的虚拟键码
+    home = 0x24,
     ["end"] = 0x23,           -- 用字符串形式定义end键，避免关键字冲突
     z = 0x5A,
     c = 0x43,
@@ -122,12 +122,12 @@ local kill = 0
 -- 解绑相关按键
 engine.execute_client_cmd("unbind z")
 engine.execute_client_cmd("unbind c")
-engine.execute_client_cmd("unbind home")  -- 解除Home键默认绑定
-engine.execute_client_cmd("unbind end")   -- 解除End键默认绑定
-engine.execute_client_cmd("unbind pgup")  -- 解除PageUp键默认绑定
-engine.execute_client_cmd("unbind pgdn")  -- 解除PageDown键默认绑定
-engine.execute_client_cmd("unbind '-'")   -- 解除"-"键默认绑定
-engine.execute_client_cmd("unbind '='")   -- 解除"="键默认绑定
+engine.execute_client_cmd("unbind home")
+engine.execute_client_cmd("unbind end")
+engine.execute_client_cmd("unbind pgup")
+engine.execute_client_cmd("unbind pgdn")
+engine.execute_client_cmd("unbind '-'")
+engine.execute_client_cmd("unbind '='")
 
 -- 击杀播报回调，添加开关控制
 register_callback("player_death", function(event)
