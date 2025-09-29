@@ -11,13 +11,6 @@ local welcome_messages = {
     "Меня зовут Сакурайма Хатсуюки",
 }
 
-local page_up_messages = {
-    "QQ群: 953173101 | 加入我们",
-}
-
-local page_down_messages = {
-    "网址: cxs.hvh.asia | 续费外挂",
-}
 
 local DEFAULT_YAW = 180
 local rotation_speed = 0
@@ -31,14 +24,7 @@ local kill_message_enabled = false
 local home_last_state = false
 local current_yaw = DEFAULT_YAW
 local last_update_time = os.clock()
-local page_up_enabled = false
-local page_down_enabled = false
-local next_page_up_time = 0
-local next_page_down_time = 0
-local page_up_message_index = 1
-local page_down_message_index = 1
-local page_up_last_state = false
-local page_down_last_state = false
+
 local z_last_state = false
 local c_last_state = false
 local end_last_state = false
@@ -47,8 +33,7 @@ local equal_last_state = false
 
 local KEYS = {
     space = 0x20,
-    page_up = 0x21,
-    page_down = 0x22,
+
     home = 0x24,              -- Home键的虚拟键码
     ["end"] = 0x23,           -- 用字符串形式定义end键，避免关键字冲突
     z = 0x5A,
@@ -126,8 +111,7 @@ engine.execute_client_cmd("unbind z")
 engine.execute_client_cmd("unbind c")
 engine.execute_client_cmd("unbind home")  -- 解除Home键默认绑定
 engine.execute_client_cmd("unbind end")   -- 解除End键默认绑定
-engine.execute_client_cmd("unbind pgup")  -- 解除PageUp键默认绑定
-engine.execute_client_cmd("unbind pgdn")  -- 解除PageDown键默认绑定
+
 engine.execute_client_cmd("unbind '-'")   -- 解除"-"键默认绑定
 engine.execute_client_cmd("unbind '='")   -- 解除"="键默认绑定
 
@@ -167,8 +151,7 @@ local function start_sending_welcome_messages()
     next_send_time = os.clock()  -- 立即发送第一条消息
     
     -- 启动自我介绍时，关闭其他互斥功能
-    page_up_enabled = false    -- 关闭群广告
-    page_down_enabled = false  -- 关闭卡网广告
+
     kill_message_enabled = false -- 关闭击杀播报
 end
 
