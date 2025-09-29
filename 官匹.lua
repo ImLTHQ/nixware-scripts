@@ -12,7 +12,7 @@ local welcome_messages = {
 }
 
 local page_up_messages = {
-    "QQ群: 953173101 | 加入我们",
+    "QQ群: 597282250 | 加入我们",
 }
 
 
