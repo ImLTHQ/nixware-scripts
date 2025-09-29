@@ -119,7 +119,6 @@ local kill_say = {
 
 local kill = 0
 
--- 解绑相关按键
 engine.execute_client_cmd("unbind z")
 engine.execute_client_cmd("unbind c")
 engine.execute_client_cmd("unbind home")
@@ -128,6 +127,7 @@ engine.execute_client_cmd("unbind pgup")
 engine.execute_client_cmd("unbind pgdn")
 engine.execute_client_cmd("unbind '-'")
 engine.execute_client_cmd("unbind '='")
+engine.execute_client_cmd("bind l say 我全家都死了")
 
 -- 击杀播报回调，添加开关控制
 register_callback("player_death", function(event)
