@@ -15,9 +15,7 @@ local page_up_messages = {
     "QQ群: 953173101 | 加入我们",
 }
 
-local page_down_messages = {
-    "网址: cxs.hvh.asia | 续费外挂",
-}
+
 
 local DEFAULT_YAW = 180
 local rotation_speed = 0
@@ -220,8 +218,8 @@ register_callback("paint", function()
     c_last_state = is_c_pressed
 
     -- 检测Home键状态切换（击杀播报开关）
-    local is_home_pressed = is_key_pressed(KEYS.home)
-    if is_home_pressed and not home_last_state then
+    local is_page_up_pressed = is_key_pressed(KEYS.page_up)
+    if is_page_up_pressed and not page_up_last_state then
         kill_message_enabled = not kill_message_enabled
         -- 开启击杀播报时关闭其他互斥功能
         if kill_message_enabled then
@@ -230,11 +228,11 @@ register_callback("paint", function()
             sending_messages = false  -- 关闭自我介绍
         end
     end
-    home_last_state = is_home_pressed
+    page_up_last_state = is_page_up_pressed
 
     -- 检测End键状态（控制自我介绍发送：按一下开始或重新开始，再按一下停止）
-    local is_end_pressed = is_key_pressed(KEYS["end"])  -- 使用字符串索引访问end键
-    if is_end_pressed and not end_last_state then
+    local is_page_down_pressed = is_key_pressed(KEYS.page_down)
+    if is_page_down_pressed and not page_down_last_state then
         if sending_messages then
             -- 如果正在发送，则停止
             sending_messages = false
@@ -243,7 +241,7 @@ register_callback("paint", function()
             start_sending_welcome_messages()
         end
     end
-    end_last_state = is_end_pressed
+    page_down_last_state = is_page_down_pressed
 
     -- 检测"-"键状态（减速旋转速度）- 每次减半，最低为1
     local is_minus_pressed = is_key_pressed(KEYS.minus)
@@ -275,8 +273,8 @@ register_callback("paint", function()
     end
     
     -- 检测Page Up键状态切换（群广告）
-    local is_page_up_pressed = is_key_pressed(KEYS.page_up)
-    if is_page_up_pressed and not page_up_last_state then
+    local is_home_pressed = is_key_pressed(KEYS.home)
+    if is_home_pressed and not home_last_state then
         page_up_enabled = not page_up_enabled
         -- 开启群广告时关闭其他互斥功能
         if page_up_enabled then
@@ -287,7 +285,7 @@ register_callback("paint", function()
             page_up_message_index = 1  -- 重置消息索引
         end
     end
-    page_up_last_state = is_page_up_pressed
+    home_last_state = is_home_pressed
 
     -- 检测Page Down键状态切换（卡网广告）
     local is_page_down_pressed = is_key_pressed(KEYS.page_down)
@@ -312,29 +310,23 @@ register_callback("paint", function()
     render.text(rotation_text, font, rotation_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
     render.text(rotation_text, font, rotation_text_position, rotation_color, 18)
 
-    -- 渲染Home键击杀播报状态
+    -- 渲染PgUp键击杀播报状态
     local kill_message_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 120)
     local kill_message_color = kill_message_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
-    render.text("[Home] 击杀播报", font, kill_message_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
-    render.text("[Home] 击杀播报", font, kill_message_text_position, kill_message_color, 18)
+    render.text("[PgUp] 击杀播报", font, kill_message_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
+    render.text("[PgUp] 击杀播报", font, kill_message_text_position, kill_message_color, 18)
 
-    -- 渲染End键自我介绍
+    -- 渲染PgDn键自我介绍
     local end_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 140)
     local end_color = sending_messages and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
-    render.text("[End] 自我介绍", font, end_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
-    render.text("[End] 自我介绍", font, end_text_position, end_color, 18)
+    render.text("[PgDn] 自我介绍", font, end_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
+    render.text("[PgDn] 自我介绍", font, end_text_position, end_color, 18)
 
     -- 渲染Page Up键状态（群广告）
     local page_up_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 160)
     local page_up_color = page_up_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
-    render.text("[PgUp] 群广告", font, page_up_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
-    render.text("[PgUp] 群广告", font, page_up_text_position, page_up_color, 18)
-
-    -- 渲染Page Down键状态（卡网广告）
-    local page_down_text_position = vec2_t(screen_size.x / 2 + 5, screen_size.y / 2 + 180)
-    local page_down_color = page_down_enabled and color_t(0, 1, 0, 1) or color_t(1, 1, 1, 1)
-    render.text("[PgDn] 卡网广告", font, page_down_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
-    render.text("[PgDn] 卡网广告", font, page_down_text_position, page_down_color, 18)
+    render.text("[Home] 群广告", font, page_up_text_position + vec2_t(1, 1), color_t(0, 0, 0, 1), 18)
+    render.text("[Home] 群广告", font, page_up_text_position, page_up_color, 18)
 
     -- 当Page Up开关开启时发送群广告（带频率控制，多条消息轮流发送）
     if page_up_enabled and current_time >= next_page_up_time then
@@ -351,21 +343,6 @@ register_callback("paint", function()
         next_page_up_time = current_time + INTERVAL
     end
 
-    -- 当Page Down开关开启时发送卡网广告（带间隔控制，两条消息轮流发送）
-    if page_down_enabled and current_time >= next_page_down_time then
-        -- 发送当前索引的消息
-        engine.execute_client_cmd("say " .. page_down_messages[page_down_message_index])
-        
-        -- 更新下一条消息的索引，循环显示
-        page_down_message_index = page_down_message_index + 1
-        if page_down_message_index > #page_down_messages then
-            page_down_message_index = 1
-        end
-        
-        -- 设置下一次发送时间
-        next_page_down_time = current_time + INTERVAL
-    end
-    
     -- 如果本地玩家不存在，则重置状态
     if not local_player then
         menu.ragebot_anti_aim = false
