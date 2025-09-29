@@ -12,6 +12,9 @@ local INDICATOR_DISTANCE = 75
 
 engine.execute_client_cmd("unbind z")
 engine.execute_client_cmd("unbind c")
+engine.execute_client_cmd("unbind mouse4")
+engine.execute_client_cmd("unbind mouse5")
+engine.execute_client_cmd("bind alt +voicerecord")
 
 ffi.cdef [[
     unsigned short GetAsyncKeyState(int vKey);
